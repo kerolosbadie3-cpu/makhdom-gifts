@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>موقع هدايا إعدادي خادم</title>
+    <!-- مكتبة المفرقعات والاحتفالات (Confetti) -->
+    <script src="https://jsdelivr.net"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #74ebd5, #9face6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            user-select: none;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            position: relative;
+        }
+        h2 { color: #333; }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        button {
+            background-color: #5c6bc0;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.3s;
+        }
+        button:hover { background-color: #3f51b5; }
+        .hidden { display: none; }
+        
+        /* تصميم منطقة الخدش */
+        .scratch-container {
+            position: relative;
+            width: 300px;
+            height: 150px;
+            margin: 20px auto;
+            background-color: #f9f9f9;
+            border: 2px dashed #bdc3c7;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .scratch-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+        }
+        #scratchCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 2;
+            cursor: pointer;
+            touch-action: none;
+        }
+        .error { color: red; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <!-- الصفحة الأولى: تسجيل الدخول -->
+    <div id="loginPage" class="card">
+        <h2>🎁 سحب هدايا المواظبة 🎁</h2>
+        <p>اكتب اسمك ورقم تليفونك لمعرفة هديتك</p>
+        <input type="text" id="studentName" placeholder="الاسم ثلاثي كالعادة">
+        <input type="tel" id="studentPhone" placeholder="رقم التليفون">
+        <button onclick="checkGift()">ادخل للسحب المشوق!</button>
+        <p id="errorMessage" class="error"></p>
+    </div>
+
+    <!-- الصفحة الثانية: صفحة الهدية المخفية بالكامل -->
+    <div id="giftPage" class="card hidden">
+        <h2 id="welcomeMessage" style="color: #2ecc71; margin-bottom: 5px;"></h2>
+        <h3 id="studentNameDisplay" style="color: #34495e; margin-top: 0;"></h3>
+        <p>اخربش المستطيل الفضي اللي تحت عشان تكشف هديتك 👇</p>
+        
+        <!-- منطقة الكارت المخفي -->
+        <div class="scratch-container">
+            <!-- الهدية الحقيقية (تظهر بعد الخدش) -->
+            <div class="scratch-content">
+                <span style="font-size: 30px;">🎁</span>
+                <h2 id="giftResult" style="color: #e74c3c; margin: 5px 0;"></h2>
+            </div>
+            <!-- الطبقة الفضية التي سيتم خدشها -->
+            <canvas id="scratchCanvas" width="300" height="150"></canvas>
+        </div>
+
+        <p style="font-size: 13px; color: #7f8c8d;">(خد لقطة شاشة بعد الخدش ووريها لأمين الخدمة)</p>
+    </div>
+
+    <!-- المؤثرات الصوتية المباشرة والمجانية من Mixkit -->
+    <audio id="scratchSound" src="https://mixkit.co" preload="auto"></audio>
+    <audio id="winSound" src="https://mixkit.co" preload="auto"></audio>
+
+    <script>
+        // 1. داتا المخدومين المؤهلين
+        const allowedStudents = [
+            { name: "مينا مجدي", phone: "01234567890" },
+            { name: "كيرلس عماد", phone: "01122334455" },
+            { name: "جون فايز", phone: "01555667788" },
+            { name: "مارينا يوسف", phone: "01000111222" }
+        ];
+
+        // 2. قائمة الهدايا المتاحة للسحب العشوائي
+        const giftsList = [
+            "كتاب روحي مميز 📖",
+            "نوت بوك وقلم شيك 📝",
+            "سلسلة مفاتيح بشكل صليب 🔑",
+            "مج حراري للمشروبات ☕",
+            "كارت شحن فئة 50 جنيه 📱",
+            "ساعة يد شبابي ⌚"
+        ];
+
+        // 3. رابط جوجل شيت الحقيقي والصحيح الخاص بك
+        const GOOGLE_SHEET_WEBHOOK = "https://google.com";
+
+        let currentUser = null;
+        let wonGift = "";
+        let isScratched = false;
+
+        function checkGift() {
+            const inputName = document.getElementById("studentName").value.trim();
+            const inputPhone = document.getElementById("studentPhone").value.trim();
+            const errorMsg = document.getElementById("errorMessage");
+
+            const studentFound = allowedStudents.find(s => s.name === inputName && s.phone === inputPhone);
+
+            if (studentFound) {
+                currentUser = studentFound;
+                wonGift = getPersistentGift(studentFound.phone);
+
+                document.getElementById("loginPage").classList.add("hidden");
+                document.getElementById("giftPage").classList.remove("hidden");
+                
+                document.getElementById("welcomeMessage").innerText = `مبروووووك يا بطل 🤍☺️🥳`;
+                document.getElementById("studentNameDisplay").innerText = `البطل: ${studentFound.name}`;
+                document.getElementById("giftResult").innerText = wonGift;
+
+                initScratchCard();
+            } else {
+                errorMsg.innerText = "الاسم أو الرقم غير مسجل في كشوف حضور الـ 4 جمعات المتتالية. راجع أمين الخدمة!";
+            }
+        }
+
+        function getPersistentGift(phone) {
+            let hash = 0;
+            for (let i = 0; i < phone.length; i++) {
+                hash = phone.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            const index = Math.abs(hash) % giftsList.length;
+            return giftsList[index];
+        }
+
+        function initScratchCard() {
+            const canvas = document.getElementById("scratchCanvas");
+            const ctx = canvas.getContext("2d");
+            const scratchSound = document.getElementById('scratchSound');
+
+            ctx.fillStyle = "#bdc3c7";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = "#34495e";
+            ctx.font = "bold 16px Segoe UI";
+            ctx.textAlign = "center";
+            ctx.fillText("امسح هنا بصباعك أو الماوس 👆", canvas.width / 2, canvas.height / 2 + 5);
+
+            let isDrawing = false;
+
+            function scratch(e) {
+                if (!isDrawing) return;
+                if(scratchSound.paused) scratchSound.play();
+                
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.clientX || (e.touches && e.touches.clientX)) - rect.left;
+                const y = (e.clientY || (e.touches && e.touches.clientY)) - rect.top;
+
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.beginPath();
+                ctx.arc(x, y, 20, 0, Math.PI * 2);
+                ctx.fill();
+
+                checkScratchPercentage();
+            }
+
+            canvas.addEventListener("mousedown", () => isDrawing = true);
+            canvas.addEventListener("mouseup", () => { isDrawing = false; scratchSound.pause(); });
+            canvas.addEventListener("mousemove", scratch);
+
+            canvas.addEventListener("touchstart", () => isDrawing = true);
+            canvas.addEventListener("touchend", () => { isDrawing = false; scratchSound.pause(); });
+            canvas.addEventListener("touchmove", scratch);
+        }
+
+        function checkScratchPercentage() {
+            if (isScratched) return;
+            const canvas = document.getElementById('scratchCanvas');
+            const ctx = canvas.getContext('2d');
+            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            let transparentPixels = 0;
+
+            for (let i = 3; i < imgData.data.length; i += 4) {
+                if (imgData.data[i] === 0) transparentPixels++;
+            }
+
+            const percentage = (transparentPixels / (canvas.width * canvas.height)) * 100;
+            
+            if (percentage > 40) {
+                isScratched = true;
+                canvas.style.display = 'none';
+                document.getElementById('winSound').play();
+                triggerConfetti();
+                sendDataToGoogleSheet();
+            }
+        }
+
+        function triggerConfetti() {
+            var duration = 4 * 1000;
+            var end = Date.now() + duration;
+
+            (function frame() {
+                confetti({ particleCount: 4, angle: 60, spread: 55, origin: { x: 0 } });
+                confetti({ particleCount: 4, angle: 120, spread: 55, origin: { x: 1 } });
+                if (Date.now() < end) { requestAnimationFrame(frame); }
+            }());
+        }
+
+        function sendDataToGoogleSheet() {
+            if(GOOGLE_SHEET_WEBHOOK === "") return;
+
+            const payload = {
+                name: currentUser.name,
+                phone: currentUser.phone,
+                gift: wonGift,
+                date: new Date().toLocaleString('ar-EG')
+            };
+

@@ -1,4 +1,5 @@
-const GOOGLE_FORM_URL = "https://google.com";
+// ⚠️ حط الرابط اللي نسخته من الـ Apps Script هنا بين علامات التنصيص
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxm4F_13cSMK8KHyV2fiUg2LVJ3Wn-ZsJfrnbQkk4GcoZ07HeQqHQ5n3FasHJDty8oChQ/exec";
 
 const allowedUsers = [
     { name: "مينا مجدي", phone: "01234567890" },
@@ -95,14 +96,14 @@ function checkScratchPercentage() {
     }
 }
 
+// دالة الإرسال المباشر والجديدة للشيت بدون فورم
 function sendDataToExcel(name, phone, gift) {
-    const url = `${GOOGLE_FORM_URL}?entry.344207285=${encodeURIComponent(name)}&entry.103691773=${encodeURIComponent(phone)}&entry.1006340148=${encodeURIComponent(gift)}`;
+    const url = `${GOOGLE_SCRIPT_URL}?name=${encodeURIComponent(name)}&phone=${encodeURIComponent(phone)}&gift=${encodeURIComponent(gift)}`;
     fetch(url, { method: 'POST', mode: 'no-cors' })
-    .then(() => console.log("Done"))
+    .then(() => console.log("Success"))
     .catch((err) => console.error(err));
 }
 
-// أحداث الماوس للكمبيوتر
 canvas.addEventListener('mousedown', () => isDrawing = true);
 canvas.addEventListener('mouseup', () => isDrawing = false);
 canvas.addEventListener('mousemove', (e) => {
@@ -111,12 +112,11 @@ canvas.addEventListener('mousemove', (e) => {
     scratch(e.clientX - rect.left, e.clientY - rect.top);
 });
 
-// أحداث اللمس للموبايل (تم تعديلها لتمنع التعليق والضغطة المطولة)
 canvas.addEventListener('touchstart', (e) => {
     isDrawing = true;
     e.preventDefault();
     const rect = canvas.getBoundingClientRect();
-    scratch(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
+    scratch(e.touches.clientX - rect.left, e.touches.clientY - rect.top);
 }, { passive: false });
 
 canvas.addEventListener('touchend', () => isDrawing = false);
@@ -124,5 +124,5 @@ canvas.addEventListener('touchmove', (e) => {
     if (!isDrawing) return;
     e.preventDefault();
     const rect = canvas.getBoundingClientRect();
-    scratch(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
+    scratch(e.touches.clientX - rect.left, e.touches.clientY - rect.top);
 }, { passive: false });

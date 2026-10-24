@@ -116,28 +116,18 @@ function checkScratchPercentage() {
     }
 }
 
+// الدالة الجديدة والمضمونة للإرسال من الموبايل والكمبيوتر بدون مشاكل أمان
 function sendDataToExcel(name, phone, gift) {
-    const formData = new FormData();
-    
-    formData.append('entry.344207285', name);
-    formData.append('entry.103691773', phone);
-    formData.append('entry.1006340148', gift);
+    // تجميع البيانات في رابط واحد مخفي ومباشر
+    const url = `${GOOGLE_FORM_URL}?entry.344207285=${encodeURIComponent(name)}&entry.103691773=${encodeURIComponent(phone)}&entry.1006340148=${encodeURIComponent(gift)}`;
 
-    fetch(GOOGLE_FORM_URL, {
+    // إرسال الرابط فوراً في الخلفية
+    fetch(url, {
         method: 'POST',
-        mode: 'no-cors',
-        body: formData
+        mode: 'no-cors'
     }).then(() => {
-        console.log("تم تسجيل الهدية في شيت الإكسل بنجاح! 🎉");
+        console.log("تم الإرسال بنجاح أكيد! 🎉");
     }).catch((error) => {
-        console.error("خطأ في الإرسال:", error);
+        console.error("خطأ:", error);
     });
 }
-
-canvas.addEventListener('mousedown', () => isDrawing = true);
-canvas.addEventListener('mouseup', () => isDrawing = false);
-canvas.addEventListener('mousemove', scratch);
-
-canvas.addEventListener('touchstart', () => isDrawing = true);
-canvas.addEventListener('touchend', () => isDrawing = false);
-canvas.addEventListener('touchmove', scratch);

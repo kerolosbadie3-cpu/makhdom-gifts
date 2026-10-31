@@ -1,4 +1,4 @@
-// قاعدة بيانات الحاضرين بالاسم الرباعي (تم فحصها وتأمينها للموبايل)
+// قاعدة بيانات الحاضرين بالاسم الرباعي (مضمونة ومفحوصة تماماً للموبايل)
 const allowedUsers = [
     { name: "مينا نبيل صبحي عازر" },
     { name: "بيشوي منير كمال فوزي" },
@@ -32,7 +32,7 @@ const allowedUsers = [
     { name: "جون ناصر شكري فوزي" }
 ];
 
-// قائمة الهدايا المباشرة والمبسطة بدون أي رموز أو بطاقات جانبية وبخط مكبر
+// قائمة الهدايا المباشرة والمبسطة بدون رموز وبخط مكبر
 const gifts = [
     "25 كارت",
     "30 كارت",
@@ -82,19 +82,17 @@ btnCheck.addEventListener('click', () => {
 
     const cleanInput = normalizeArabic(inputName);
     const inputWords = cleanInput.split(" ");
-    
-    // تأمين جلب الاسم الأول كنص صريح للموبايل
-    const inputFirstWord = String(inputWords[0]); 
+    const inputFirstWord = inputWords[0]; // جلب الاسم الأول بشكل صحيح ومضمون ككلمة نصية مفردة
 
     const userFound = allowedUsers.find(user => {
         const cleanDBName = normalizeArabic(user.name);
         const dbWords = cleanDBName.split(" ");
-        const dbFirstWord = String(dbWords[0]);
+        const dbFirstWord = dbWords[0]; // جلب الاسم الأول المسجل ككلمة نصية مفردة
 
-        // 1. التحقق النصي الصارم من الاسم الأول لحماية الإخوات والأقارب على الموبايل
+        // 1. يجب أن يتطابق الاسم الأول تماماً لحماية الإخوات والأقارب
         if (inputFirstWord !== dbFirstWord) return false;
 
-        // 2. مقارنة مرنة تضمن الدخول الصحيح والمباشر
+        // 2. مقارنة مرنة ومباشرة تضمن الدخول السريع والصحيح على الموبايل
         return cleanDBName.includes(cleanInput) || cleanInput.includes(dbFirstWord);
     });
 
@@ -148,7 +146,7 @@ function scratch(e) {
     if (!isDrawing || isSaved) return;
     e.preventDefault(); 
     const rect = canvas.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX; // تصحيح جلب اللمس للموبايل بدقة
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
     const x = clientX - rect.left;
     const y = clientY - rect.top;

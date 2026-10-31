@@ -126,10 +126,14 @@ btnCheck.addEventListener('click', () => {
 });
 
 function initScratchCard() {
+    // تعديل ذكي لضبط الأبعاد البرمجية بناءً على حجم شاشة الموبايل الحالية
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+
     ctx.fillStyle = '#b2bec3';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    ctx.font = '18px Segoe UI';
+    ctx.font = '16px Segoe UI';
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';

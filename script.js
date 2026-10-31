@@ -1,4 +1,4 @@
-// قاعدة بيانات الحاضرين بالاسم الرباعي (تم التحديث لـ 30 اسماً مسيحياً عشوائياً جديداً بالكامل)
+// قاعدة بيانات الحاضرين بالاسم الرباعي (تم فحصها وتأمينها للموبايل)
 const allowedUsers = [
     { name: "مينا نبيل صبحي عازر" },
     { name: "بيشوي منير كمال فوزي" },
@@ -82,18 +82,19 @@ btnCheck.addEventListener('click', () => {
 
     const cleanInput = normalizeArabic(inputName);
     const inputWords = cleanInput.split(" ");
-    const inputFirstWord = inputWords[0]; 
+    
+    // تأمين جلب الاسم الأول كنص صريح للموبايل
+    const inputFirstWord = String(inputWords[0]); 
 
-    // آلية بحث جديدة مبسطة ومضمونة تماماً ومحصنة ضد التعطيل والتداخلات
     const userFound = allowedUsers.find(user => {
         const cleanDBName = normalizeArabic(user.name);
         const dbWords = cleanDBName.split(" ");
-        const dbFirstWord = dbWords[0];
+        const dbFirstWord = String(dbWords[0]);
 
-        // 1. يجب أن يتطابق الاسم الأول تماماً لحماية خصوصية الإخوات والأقارب
+        // 1. التحقق النصي الصارم من الاسم الأول لحماية الإخوات والأقارب على الموبايل
         if (inputFirstWord !== dbFirstWord) return false;
 
-        // 2. مقارنة ذكية ومبسطة ومجربة: للتأكد من الاندماج الكامل
+        // 2. مقارنة مرنة تضمن الدخول الصحيح والمباشر
         return cleanDBName.includes(cleanInput) || cleanInput.includes(dbFirstWord);
     });
 
@@ -147,8 +148,8 @@ function scratch(e) {
     if (!isDrawing || isSaved) return;
     e.preventDefault(); 
     const rect = canvas.getBoundingClientRect();
-    const clientX = e.touches ? e.touches.clientX : e.clientX;
-    const clientY = e.touches ? e.touches.clientY : e.clientY;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
     const x = clientX - rect.left;
     const y = clientY - rect.top;
     ctx.globalCompositeOperation = 'destination-out';
@@ -179,7 +180,6 @@ function checkScratchPercentage() {
     }
 }
 
-// دالة احتفال مدمجة ومطورة لتساقط الألوان على موجات متتالية تدوم أطول
 function triggerLocalConfetti() {
     const colors = ['#ff7675', '#74b9ff', '#55efc4', '#ffeaa7', '#a29bfe', '#fd79a8'];
     

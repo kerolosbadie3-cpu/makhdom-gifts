@@ -9,7 +9,7 @@
 <body>
 
     <div class="container">
-        <!-- 1. صفحة الدخول والتحقق -->
+        <!-- 1. صفحة الدخول والتحقق المظبوطة -->
         <div id="login-page" class="card">
             <h2>🏆 لوحة الشرف الأسبوعية</h2>
             <p>سجل اسمك عشان تشوف هديتك لو حضرت 4 جمعات ورا بعض!</p>
@@ -38,46 +38,6 @@
 
             <!-- زر العودة لصفحة الدخول لتسجيل مخدوم آخر -->
             <button id="btn-logout" class="back-btn">دخول اسم آخر 🔄</button>
-        </div>
-    </div>
-
-    <script src="script.js" defer></script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مفاجأة خدمة إعدادي 🎉</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-    <div class="container">
-        <!-- 1. صفحة الدخول والتحقق -->
-        <div id="login-page" class="card">
-            <h2>🏆 لوحة الشرف الأسبوعية</h2>
-            <p>سجل اسمك ورقم تليفونك عشان تشوف هديتك لو حضرت 4 جمعات ورا بعض!</p>
-            
-            <input type="text" id="user-name" placeholder="اكتب اسمك الثلاثي..." required>
-            <input type="tel" id="user-phone" placeholder="رقم تليفونك..." required>
-            
-            <button id="btn-check">اكتشف هديتك 🎁</button>
-            <p id="error-msg" class="error"></p>
-        </div>
-
-        <!-- 2. صفحة الهدية المخفية -->
-        <div id="gift-page" class="card hidden">
-            <h2 id="welcome-user">مبروووووك يا بطل 🤍☺️🥳</h2>
-            <p>امسح واخدش المستطيل الرمادي اللي تحت عشان تكشف عن هديتك! 👇</p>
-            
-            <div class="scratch-container">
-                <!-- الهدية الحقيقية -->
-                <div id="gift-result" class="gift-text">🎯 ميدالية الخدمة</div>
-                <!-- الطبقة الرمادية المموّهة -->
-                <canvas id="scratch-canvas" width="300" height="100"></canvas>
-            </div>
         </div>
     </div>
 

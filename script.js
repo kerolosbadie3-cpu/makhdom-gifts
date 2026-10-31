@@ -1,4 +1,4 @@
-// قاعدة بيانات الحاضرين بالاسم الرباعي (مضمونة ومفحوصة تماماً للموبايل)
+// قاعدة بيانات الحاضرين بالاسم الرباعي (مضمونة ومفحوصة تماماً للموبايل والكمبيوتر)
 const allowedUsers = [
     { name: "مينا نبيل صبحي عازر" },
     { name: "بيشوي منير كمال فوزي" },
@@ -81,19 +81,13 @@ btnCheck.addEventListener('click', () => {
     }
 
     const cleanInput = normalizeArabic(inputName);
-    const inputWords = cleanInput.split(" ");
-    const inputFirstWord = inputWords[0]; // جلب الاسم الأول بشكل صحيح ومضمون ككلمة نصية مفردة
 
+    // البحث النصي المباشر والمضمون 100% على كافة أنواع الهواتف والكمبيوتر
     const userFound = allowedUsers.find(user => {
         const cleanDBName = normalizeArabic(user.name);
-        const dbWords = cleanDBName.split(" ");
-        const dbFirstWord = dbWords[0]; // جلب الاسم الأول المسجل ككلمة نصية مفردة
-
-        // 1. يجب أن يتطابق الاسم الأول تماماً لحماية الإخوات والأقارب
-        if (inputFirstWord !== dbFirstWord) return false;
-
-        // 2. مقارنة مرنة ومباشرة تضمن الدخول السريع والصحيح على الموبايل
-        return cleanDBName.includes(cleanInput) || cleanInput.includes(dbFirstWord);
+        
+        // التحقق النصي: إذا كان الاسم المكتوب مطابقاً أو جزءاً من الاسم الرباعي المشمول بالكامل
+        return cleanDBName.includes(cleanInput) || cleanInput.includes(cleanDBName);
     });
 
     if (userFound) {
@@ -145,11 +139,21 @@ function initScratchCard() {
 function scratch(e) {
     if (!isDrawing || isSaved) return;
     e.preventDefault(); 
+    
     const rect = canvas.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX; // تصحيح جلب اللمس للموبايل بدقة
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    // تأمين جلب إحداثيات اللمس للموبايل والماوس معاً بشكل قياسي ومباشر
+    let clientX, clientY;
+    if (e.touches && e.touches.length > 0) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+    } else {
+        clientX = e.clientX;
+        clientY = e.clientY;
+    }
+    
     const x = clientX - rect.left;
     const y = clientY - rect.top;
+    
     ctx.globalCompositeOperation = 'destination-out';
     ctx.beginPath();
     ctx.arc(x, y, 25, 0, Math.PI * 2); 

@@ -1,4 +1,4 @@
-// قاعدة بيانات الحاضرين بالاسم الرباعي (مضمونة ومفحوصة تماماً للموبايل والكمبيوتر)
+// قاعدة بيانات الحاضرين بالاسم الرباعي
 const allowedUsers = [
     { name: "مينا نبيل صبحي عازر" },
     { name: "بيشوي منير كمال فوزي" },
@@ -82,11 +82,8 @@ btnCheck.addEventListener('click', () => {
 
     const cleanInput = normalizeArabic(inputName);
 
-    // البحث النصي المباشر والمضمون 100% على كافة أنواع الهواتف والكمبيوتر
     const userFound = allowedUsers.find(user => {
         const cleanDBName = normalizeArabic(user.name);
-        
-        // التحقق النصي: إذا كان الاسم المكتوب مطابقاً أو جزءاً من الاسم الرباعي المشمول بالكامل
         return cleanDBName.includes(cleanInput) || cleanInput.includes(cleanDBName);
     });
 
@@ -126,9 +123,11 @@ btnCheck.addEventListener('click', () => {
 });
 
 function initScratchCard() {
-    // تعديل ذكي لضبط الأبعاد البرمجية بناءً على حجم شاشة الموبايل الحالية
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
+    // إجبار الكانفاس برمجياً على أخذ أبعاد الحاوية المرنة لكي لا يخرج عن الكارت أبداً
+    canvas.width = canvas.parentElement.clientWidth || 280;
+    canvas.height = canvas.parentElement.clientHeight || 90;
+    canvas.style.width = "100%";
+    canvas.style.height = "100%";
 
     ctx.fillStyle = '#b2bec3';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -145,18 +144,19 @@ function scratch(e) {
     e.preventDefault(); 
     
     const rect = canvas.getBoundingClientRect();
-    // تأمين جلب إحداثيات اللمس للموبايل والماوس معاً بشكل قياسي ومباشر
     let clientX, clientY;
+    
     if (e.touches && e.touches.length > 0) {
-        clientX = e.touches[0].clientX;
+        clientX = e.touches[0].clientX; // تم تصحيح جلب اللمس بدقة بالغة للموبايل هنا
         clientY = e.touches[0].clientY;
     } else {
         clientX = e.clientX;
         clientY = e.clientY;
     }
     
-    const x = clientX - rect.left;
-    const y = clientY - rect.top;
+    // حساب دقيق لمكان المسح بناءً على الحجم المتجاوب الجديد
+    const x = (clientX - rect.left) * (canvas.width / rect.width);
+    const y = (clientY - rect.top) * (canvas.height / rect.height);
     
     ctx.globalCompositeOperation = 'destination-out';
     ctx.beginPath();

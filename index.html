@@ -12,19 +12,22 @@
         <!-- 1. صفحة الدخول والتحقق -->
         <div id="login-page" class="card">
             <h2>🏆 لوحة الشرف الأسبوعية</h2>
-            <p>سجل اسمك ورقم تليفونك عشان تشوف هديتك لو حضرت 4 جمعات ورا بعض!</p>
+            <p>سجل اسمك عشان تشوف هديتك لو حضرت 4 جمعات ورا بعض!</p>
             
-            <input type="text" id="user-name" placeholder="اكتب اسمك الثلاثي..." required>
-            <input type="tel" id="user-phone" placeholder="رقم تليفونك..." required>
+            <input type="text" id="user-name" placeholder="اكتب اسمك الرباعي..." required>
             
-            <button id="btn-check">اكتشف هديتك 🎁</button>
+            <button id="btn-check" class="pulse-btn">اكتشف هديتك 🎁</button>
             <p id="error-msg" class="error"></p>
         </div>
 
         <!-- 2. صفحة الهدية المخفية -->
         <div id="gift-page" class="card hidden">
-            <h2 id="welcome-user">مبروووووك يا بطل 🤍☺️🥳</h2>
-            <p>امسح واخدش المستطيل الرمادي اللي تحت عشان تكشف عن هديتك! 👇</p>
+            <h2 id="welcome-user">مبروووووك يا بطل 🎉🥳</h2>
+            
+            <!-- الآية المفضلة لديك عن الفرح ببيت الرب -->
+            <p class="bible-verse">«فَرِحْتُ بِالْقَائِلِينَ لِي: إِلَى بَيْتِ الرَّبِّ نَذْهَبُ» <br> <span>(مزمور 122: 1)</span></p>
+            
+            <p id="scratch-instruction">امسح واخدش المستطيل الرمادي اللي تحت عشان تكشف عن هديتك! 👇</p>
             
             <div class="scratch-container">
                 <!-- الهدية الحقيقية -->
@@ -32,6 +35,9 @@
                 <!-- الطبقة الرمادية المموّهة -->
                 <canvas id="scratch-canvas" width="300" height="100"></canvas>
             </div>
+
+            <!-- زر العودة لصفحة الدخول لتسجيل مخدوم آخر -->
+            <button id="btn-logout" class="back-btn">دخول اسم آخر 🔄</button>
         </div>
     </div>
 

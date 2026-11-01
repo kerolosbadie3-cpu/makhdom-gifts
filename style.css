@@ -12,7 +12,7 @@ body {
 .container {
     width: 95%;
     max-width: 420px;
-    position: relative; /* لضبط مكان النقاط بالنسبة للحاوية */
+    position: relative;
 }
 
 .card {
@@ -25,23 +25,18 @@ body {
     width: 100%;
 }
 
-/* تنسيق النقاط الثلاث الجديد: باللون الأسود وظاهرة بنسبة خفيفة جداً في الحتة البنفسجية فوق الكارت */
+/* تنسيق النقاط الثلاث الجديد: ظاهرة تماماً وبوضوح 100% باللون الأسود في الحتة البنفسجية فوق الكارت */
 .secret-dots {
     position: absolute;
     top: -35px; /* رفعها فوق الكارت الأبيض مباشرة */
     left: 10px;  /* وضعها على الشمال */
     font-size: 28px;
-    color: #2d3436;
-    opacity: 0.25; /* الشفافية السحرية: تجعلها سوداء باهتة مش باينة أوي للأولاد */
+    color: #000000 !important; /* لون أسود داكن صريح */
+    font-weight: bold;
     cursor: pointer;
     padding: 5px 15px;
     user-select: none;
-    z-index: 99;
-    transition: 0.2s;
-}
-
-.secret-dots:hover {
-    opacity: 0.6; /* تظهر بوضوح أكبر فقط عند وقوف الماوس عليها */
+    z-index: 999;
 }
 
 h2 { color: #2d3436; margin-bottom: 10px; font-size: 22px; }

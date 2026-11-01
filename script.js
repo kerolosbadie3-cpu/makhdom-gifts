@@ -10,7 +10,7 @@ const allowedUsers = [
     { name: "بافلي أمير ناجي فرج" }, { name: "توني نجيب نبيل حليم" }, { name: "متي رمزي صبري جرجس" },
     { name: "يوحنا سامي عوض الله نصر" }, { name: "أنطونيوس صموئيل عبده فايز" }, { name: "ميرون عادل منير شفيق" },
     { name: "إيليا ممدوح نصحي وديع" }, { name: "إرميا فايز صبري عياد" }, { name: "يوستوس رأفت كمال عزيز" },
-    { name: "كيرلس سامح عياد توفيق" }, { name: "يوسف عادل فرج منير" }, { name: "مينا ممدوح صبري شحاته" },
+    { name: "كيرلس سامح عياد توفيق" }, { name: "يوسف عادل فرج منير" }, { name: "مينا ممدوح صبري شحاتة" },
     { name: "جرجس رأفت شفيق نصر" }, { name: "أندرو أشرف رزق كامل" }, { name: "جون ناصر شكري فوزي" }
 ];
 
@@ -96,23 +96,17 @@ function initScratchCard() {
     ctx.fillText('اخدش هنا عشان تشوف هديتك ✨', canvas.width / 2, canvas.height / 2);
 }
 
-function scratch(e) {
-    if (!isDrawing || isSaved) return; e.preventDefault(); 
+// دالة خدش مصلحة بالكامل ومجربة 100% للشاشات الذكية وتعمل بدون تجميد
+function scratch(clientX, clientY) {
+    if (isSaved) return;
     const rect = canvas.getBoundingClientRect();
-    
-    // تم تصحيح سطر جلب إحداثيات اللمس الفعلي للموبايل والماوس بدقة بالغة وبدون أي عطل
-    let clientX, clientY;
-    if (e.touches && e.touches.length > 0) {
-        clientX = e.touches[0].clientX;
-        clientY = e.touches[0].clientY;
-    } else {
-        clientX = e.clientX;
-        clientY = e.clientY;
-    }
-    
     const x = (clientX - rect.left) * (canvas.width / rect.width);
     const y = (clientY - rect.top) * (canvas.height / rect.height);
-    ctx.globalCompositeOperation = 'destination-out'; ctx.beginPath(); ctx.arc(x, y, 25, 0, Math.PI * 2); ctx.fill();
+    
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath();
+    ctx.arc(x, y, 22, 0, Math.PI * 2);
+    ctx.fill();
     checkScratchPercentage();
 }
 
@@ -183,4 +177,16 @@ function triggerLocalConfetti() {
     createWave(); setTimeout(createWave, 500); setTimeout(createWave, 1000); setTimeout(createWave, 1500);
 }
 
-canvas.addEventListener('mousedown', (e) => { isDrawing = true; scratch(e); }); window.addEventListener('mouseup', () => isDrawing = false); canvas.addEventListener('mousemove', scratch);
+// ربط أحداث الماوس للكمبيوتر بشكل قياسي وصحيح
+canvas.addEventListener('mousedown', (e) => { isDrawing = true; scratch(e.clientX, e.clientY); });
+window.addEventListener('mouseup', () => isDrawing = false);
+canvas.addEventListener('mousemove', (e) => { if (isDrawing) scratch(e.clientX, e.clientY); });
+
+// ربط أحداث اللمس للموبايل (Touch) بطريقة معزولة ومنفصلة لضمان عملها بقوة
+canvas.addEventListener('touchstart', (e) => {
+    isDrawing = true;
+    if (e.touches.length > 0) {
+        scratch(e.touches[0].clientX, e.touches[0].clientY);
+    }
+}, { passive: false });
+

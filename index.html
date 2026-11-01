@@ -4,17 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مفاجأة خدمة إعدادي 🎉</title>
-    <link rel="stylesheet" href="style.css?v=13">
+    <link rel="stylesheet" href="style.css?v=16">
 </head>
 <body>
 
     <div class="container">
-        <!-- النقاط الثلاث السوداء الثابتة فوق الكارت على اليسار -->
-        <div id="secret-dots-btn" class="secret-dots">⁝</div>
-
         <!-- 1. صفحة الدخول والتحقق -->
         <div id="login-page" class="card">
-            <h2>🏆 لوحة الشرف الأسبوعية</h2>
+            <h2>🏆 لوحة الشرف الشهرية</h2>
             <p>سجل اسمك عشان تشوف هديتك لو حضرت 4 جمعات ورا بعض!</p>
             
             <input type="text" id="user-name" placeholder="اكتب اسمك الرباعي..." required>
@@ -27,19 +24,23 @@
         <div id="gift-page" class="card hidden">
             <h2 id="welcome-user">مبروووووك يا بطل 🎉🥳</h2>
             
+            <!-- الآية المفضلة لديك عن الفرح ببيت الرب -->
             <p class="bible-verse">«فَرِحْتُ بِالْقَائِلِينَ لِي: إِلَى بَيْتِ الرَّبِّ نَذْهَبُ» <br> <span>(مزمور 122: 1)</span></p>
             
             <p id="scratch-instruction">امسح واخدش المستطيل الرمادي اللي تحت عشان تكشف عن هديتك! 👇</p>
             
             <div class="scratch-container">
+                <!-- الهدية الحقيقية -->
                 <div id="gift-result" class="gift-text">🎯 ميدالية الخدمة</div>
+                <!-- الطبقة الرمادية المموّهة -->
                 <canvas id="scratch-canvas" width="300" height="100"></canvas>
             </div>
 
+            <!-- زر العودة لصفحة الدخول لتسجيل مخدوم آخر -->
             <button id="btn-logout" class="back-btn">دخول اسم آخر 🔄</button>
         </div>
     </div>
 
-    <script src="script.js?v=13" defer></script>
+    <script src="script.js?v=16" defer></script>
 </body>
 </html>

@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مفاجأة خدمة إعدادي 🎉</title>
-    <!-- تم تغيير رقم الإصدار لتخطي ذاكرة المتصفح تلقائياً فور الرفع -->
-    <link rel="stylesheet" href="style.css?v=41">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=42">
 </head>
 <body>
 
@@ -14,34 +16,31 @@
         <div id="login-page" class="card">
             <h2>🏆 لوحة الشرف الشهرية</h2>
             <p>سجل اسمك عشان تشوف هديتك لو حضرت 4 جمعات ورا بعض!</p>
-            
-            <input type="text" id="user-name" placeholder="اكتب اسمك الرباعي..." required>
-            
+
+            <input type="text" id="user-name" placeholder="اكتب اسمك الرباعي..."
+                   autocomplete="off" aria-label="اسمك الرباعي">
+
             <button id="btn-check" class="pulse-btn">اكتشف هديتك 🎁</button>
-            <p id="error-msg" class="error"></p>
+            <p id="error-msg" class="error" role="alert"></p>
         </div>
 
-        <!-- 2. صفحة الهدية المخفية للأولاد -->
+        <!-- 2. صفحة الهدية -->
         <div id="gift-page" class="card hidden">
             <h2 id="welcome-user">مبروووووك يا بطل 🎉🥳</h2>
-            
-            <!-- الآية المفضلة لديك عن الفرح ببيت الرب -->
-            <p class="bible-verse">«فَرِحْتُ بِالْقَائِلِينَ لِي: إِلَى بَيْتِ الرَّبِّ نَذْهَبُ» <br> <span>(مزمور 122: 1)</span></p>
-            
+
+            <p class="bible-verse">«فَرِحْتُ بِالْقَائِلِينَ لِي: إِلَى بَيْتِ الرَّبِّ نَذْهَبُ» <br> <span>(مزمور 122: 1)</span></p>
+
             <p id="scratch-instruction">امسح واخدش المستطيل الرمادي اللي تحت عشان تكشف عن هديتك! 👇</p>
-            
+
             <div class="scratch-container">
-                <!-- الهدية الحقيقية -->
-                <div id="gift-result" class="gift-text">🎯 ميدالية الخدمة</div>
-                <!-- الطبقة الرمادية المموّهة -->
-                <canvas id="scratch-canvas" width="300" height="100"></canvas>
+                <div id="gift-result" class="gift-text"></div>
+                <canvas id="scratch-canvas" width="280" height="90"></canvas>
             </div>
 
-            <!-- زر العودة لصفحة الدخول لتسجيل مخدوم آخر -->
             <button id="btn-logout" class="back-btn">دخول اسم آخر 🔄</button>
         </div>
     </div>
 
-    <script src="script.js?v=41" defer></script>
+    <script src="script.js?v=42" defer></script>
 </body>
 </html>

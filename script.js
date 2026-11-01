@@ -1,4 +1,8 @@
-// قاعدة بيانات الحاضرين بالاسم الرباعي (صافية ومجهزة للموبايل والكمبيوتر)
+// ===== الإعدادات =====
+// غيّر القيمة دي كل شهر (مثلاً "2026-12") عشان الهدايا تتغير والكل يخدش من جديد
+const SALT = "2026-11";
+
+// قاعدة بيانات الحاضرين بالاسم الرباعي
 const allowedUsers = [
     { name: "مينا نبيل صبحي عازر" },
     { name: "بيشوي منير كمال فوزي" },
@@ -32,7 +36,7 @@ const allowedUsers = [
     { name: "جون ناصر شكري فوزي" }
 ];
 
-// قائمة الجوائز الصريحة المباشرة وبخط كبير ومميز
+// قائمة الجوائز
 const gifts = [
     "25 كارت",
     "30 كارت",
@@ -43,166 +47,281 @@ const gifts = [
     "55 كارت"
 ];
 
-let currentUser = null;
-let currentGift = "";
-let isDrawing = false;
-let isSaved = false;
-
+// ===== العناصر =====
 const loginPage = document.getElementById('login-page');
 const giftPage = document.getElementById('gift-page');
 const btnCheck = document.getElementById('btn-check');
 const btnLogout = document.getElementById('btn-logout');
+const nameInput = document.getElementById('user-name');
 const errorMsg = document.getElementById('error-msg');
 const welcomeUser = document.getElementById('welcome-user');
 const giftResult = document.getElementById('gift-result');
 const scratchInstruction = document.getElementById('scratch-instruction');
-
 const canvas = document.getElementById('scratch-canvas');
 const ctx = canvas.getContext('2d');
 
-// دالة تنظيف الحروف المضمونة لإزالة الفروق الإملائية والمسافات الزائدة
+let currentUser = null;
+let currentGift = "";
+let revealed = false;
+let drawing = false;
+let lastX = 0;
+let lastY = 0;
+let lastCheck = 0;
+
+// ===== أدوات مساعدة =====
 function normalizeArabic(text) {
     if (!text) return "";
     return text
-        .replace(/[\u064B-\u065F]/g, "") 
-        .replace(/[أإآ]/g, "ا")         
-        .replace(/ة/g, "ه")            
-        .replace(/ى/g, "ي")            
-        .replace(/\s+/g, " ")          
-        .trim();                       
+        .replace(/[\u064B-\u065F\u0640]/g, "") // التشكيل والتطويل
+        .replace(/[أإآ]/g, "ا")
+        .replace(/ة/g, "ه")
+        .replace(/ى/g, "ي")
+        .replace(/\s+/g, " ")
+        .trim();
 }
 
-btnCheck.addEventListener('click', () => {
-    const inputName = document.getElementById('user-name').value;
+// تخزين آمن (بيشتغل حتى لو التصفح الخاص مانع localStorage)
+function storageGet(key) {
+    try { return localStorage.getItem(key); } catch (e) { return null; }
+}
+function storageSet(key, value) {
+    try { localStorage.setItem(key, value); } catch (e) { /* تجاهل */ }
+}
+
+// مطابقة صارمة: اسم كامل، أو بداية الاسم (3 كلمات على الأقل) بشرط تطابق واحد بس
+function findUser(input) {
+    const clean = normalizeArabic(input);
+    if (clean.split(" ").length < 3) return { error: "short" };
+
+    const exact = allowedUsers.filter(u => normalizeArabic(u.name) === clean);
+    if (exact.length === 1) return { user: exact[0] };
+
+    const starts = allowedUsers.filter(u => normalizeArabic(u.name).startsWith(clean + " "));
+    if (starts.length === 1) return { user: starts[0] };
+
+    return { error: starts.length > 1 ? "ambiguous" : "none" };
+}
+
+// الهدية ثابتة لكل اسم (نفس الاسم = نفس الهدية على أي جهاز وفي أي مرة)
+function giftFor(name) {
+    const str = SALT + "|" + normalizeArabic(name);
+    let h = 7;
+    for (let i = 0; i < str.length; i++) {
+        h = (h * 31 + str.charCodeAt(i)) >>> 0;
+    }
+    return gifts[h % gifts.length];
+}
+
+function storageKey(user) {
+    return `revealed_${SALT}_${normalizeArabic(user.name)}`;
+}
+
+// ===== تسجيل الدخول =====
+function handleCheck() {
+    const inputName = nameInput.value;
 
     if (!inputName.trim()) {
         errorMsg.innerText = "من فضلك اكتب اسمك أولاً يا بطل! ⚠️";
         return;
     }
 
-    const cleanInput = normalizeArabic(inputName);
+    const result = findUser(inputName);
 
-    // البحث النصي المباشر المتوافق مع الموبايل والكمبيوتر
-    const userFound = allowedUsers.find(user => {
-        const cleanDBName = normalizeArabic(user.name);
-        return cleanDBName.includes(cleanInput) || cleanInput.includes(cleanDBName);
-    });
-
-    if (userFound) {
-        errorMsg.innerText = "";
-        currentUser = userFound;
-        
-        loginPage.classList.add('hidden');
-        giftPage.classList.remove('hidden');
-        
-        // مبروك يا بطل في السطر الأول، والاسم ينزل تلقائياً في السطر الثاني بشكل مستقل ومنسق وبدون كلمات مكررة
-        welcomeUser.innerHTML = `مبروووووك يا بطل 🎉🥳 <br> <span style="font-size: 20px; display: block; margin-top: 8px; color: #0984e3;">${userFound.name}</span>`;
-
-        // العودة للـ LocalStorage البسيط المرتبط باسم الولد فقط بدون شهور أو فترات
-        const savedGift = localStorage.getItem(`gift_${normalizeArabic(userFound.name)}`);
-        
-        if (savedGift) {
-            currentGift = savedGift;
-            giftResult.innerText = currentGift;
-            canvas.style.display = "none";
-            isSaved = true;
-            scratchInstruction.innerText = "لقينا هديتك المحفوظة يا بطل! 🎁 ودي جائزتك الثابتة 🤍";
-            
-            triggerLocalConfetti();
-        } else {
-            const randomIndex = Math.floor(Math.random() * gifts.length);
-            currentGift = gifts[randomIndex];
-            giftResult.innerText = currentGift;
-            scratchInstruction.innerText = "امسح واخدش المستطيل الرمادي اللي تحت عشان تكشف عن هديتك! 👇";
-            
-            isSaved = false;
-            canvas.style.display = "block";
-            canvas.style.opacity = 1;
-            
-            setTimeout(initScratchCard, 50);
-        }
-    } else {
-        errorMsg.innerText = "عاش يا بطل على المحاولة! شد حيلك الجمعة الجاية والتزم بالحضور عشان تدخل سحب الهدايا المرة الجاية 🤍";
+    if (result.error === "short") {
+        errorMsg.innerText = "اكتب اسمك الرباعي كامل يا بطل (الاسم + اسم الأب + الجد + أبو الجد) ✍️";
+        return;
     }
+    if (result.error === "ambiguous") {
+        errorMsg.innerText = "في أكتر من اسم شبه كده، اكتب اسمك الرباعي كامل 🙏";
+        return;
+    }
+    if (result.error === "none") {
+        errorMsg.innerText = "عاش يا بطل على المحاولة! شد حيلك الجمعة الجاية والتزم بالحضور عشان تدخل سحب الهدايا المرة الجاية 🤍";
+        return;
+    }
+
+    showGift(result.user);
+}
+
+function showGift(user) {
+    errorMsg.innerText = "";
+    currentUser = user;
+    currentGift = giftFor(user.name);
+    giftResult.innerText = currentGift;
+
+    loginPage.classList.add('hidden');
+    giftPage.classList.remove('hidden');
+
+    // الاسم بيتكتب كنص عادي (آمن)
+    welcomeUser.textContent = "";
+    welcomeUser.appendChild(document.createTextNode("مبروووووك يا بطل 🎉🥳"));
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'welcome-name';
+    nameSpan.textContent = user.name;
+    welcomeUser.appendChild(nameSpan);
+
+    if (storageGet(storageKey(user))) {
+        // كشف الهدية قبل كده على الجهاز ده
+        revealed = true;
+        canvas.style.display = "none";
+        scratchInstruction.innerText = "لقينا هديتك المحفوظة يا بطل! 🎁 ودي جائزتك الثابتة 🤍";
+        triggerLocalConfetti();
+    } else {
+        revealed = false;
+        scratchInstruction.innerText = "امسح واخدش المستطيل الرمادي اللي تحت عشان تكشف عن هديتك! 👇";
+        requestAnimationFrame(initScratchCard);
+    }
+}
+
+btnCheck.addEventListener('click', handleCheck);
+nameInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') handleCheck();
 });
 
-function initScratchCard() {
-    canvas.width = canvas.parentElement.clientWidth || 280;
-    canvas.height = canvas.parentElement.clientHeight || 90;
-    canvas.style.width = "100%";
-    canvas.style.height = "100%";
+btnLogout.addEventListener('click', () => {
+    nameInput.value = "";
+    errorMsg.innerText = "";
+    currentUser = null;
+    currentGift = "";
+    revealed = false;
+    drawing = false;
+    giftPage.classList.add('hidden');
+    loginPage.classList.remove('hidden');
+});
 
+// ===== كارت الخدش =====
+function initScratchCard() {
+    const parent = canvas.parentElement;
+    canvas.style.transition = "none";
+    canvas.style.opacity = 1;
+    canvas.style.display = "block";
+
+    // تغيير الحجم بيصفّر حالة الـ canvas
+    canvas.width = parent.clientWidth || 280;
+    canvas.height = parent.clientHeight || 90;
+
+    ctx.globalCompositeOperation = 'source-over';
     ctx.fillStyle = '#b2bec3';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    ctx.font = '16px Segoe UI';
+
+    ctx.font = '600 16px Cairo, Tahoma, sans-serif';
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('اخدش هنا عشان تشوف هديتك ✨', canvas.width / 2, canvas.height / 2);
 }
 
-// دالة الخدش باللمس والماوس المصلحة تماماً 100% بدون تجميد
-function scratch(clientX, clientY) {
-    if (isSaved) return;
+function getPos(e) {
     const rect = canvas.getBoundingClientRect();
-    const x = (clientX - rect.left) * (canvas.width / rect.width);
-    const y = (clientY - rect.top) * (canvas.height / rect.height);
-    
+    return {
+        x: (e.clientX - rect.left) * (canvas.width / rect.width),
+        y: (e.clientY - rect.top) * (canvas.height / rect.height)
+    };
+}
+
+function scratchLine(x1, y1, x2, y2) {
     ctx.globalCompositeOperation = 'destination-out';
+    ctx.lineWidth = 44;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
     ctx.beginPath();
-    ctx.arc(x, y, 22, 0, Math.PI * 2);
-    ctx.fill();
-    checkScratchPercentage();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
 }
 
-function checkScratchPercentage() {
-    if (isSaved) return;
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const pixels = imageData.data;
-    let clearPixels = 0;
-    for (let i = 3; i < pixels.length; i += 4) {
-        if (pixels[i] === 0) clearPixels++;
+function checkScratchPercentage(force) {
+    if (revealed) return;
+
+    // نفحص كل 120 ملي ثانية بس عشان الموبايلات الضعيفة
+    const now = Date.now();
+    if (!force && now - lastCheck < 120) return;
+    lastCheck = now;
+
+    const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    let clear = 0;
+    let total = 0;
+    // عينة: بكسل من كل 16 بكسل
+    for (let i = 3; i < pixels.length; i += 64) {
+        total++;
+        if (pixels[i] === 0) clear++;
     }
-    if (clearPixels / (pixels.length / 4) > 0.35) {
-        isSaved = true;
-        
-        canvas.style.transition = "opacity 0.4s ease";
-        canvas.style.opacity = 0;
-        setTimeout(() => { canvas.style.display = "none"; }, 400);
-        
-        localStorage.setItem(`gift_${normalizeArabic(currentUser.name)}`, currentGift);
-        
-        triggerLocalConfetti();
+
+    if (total > 0 && clear / total > 0.35) {
+        revealGift();
     }
 }
 
+function revealGift() {
+    revealed = true;
+    drawing = false;
+
+    canvas.style.transition = "opacity 0.4s ease";
+    canvas.style.opacity = 0;
+    setTimeout(() => { canvas.style.display = "none"; }, 400);
+
+    if (currentUser) storageSet(storageKey(currentUser), "1");
+    triggerLocalConfetti();
+}
+
+// Pointer Events: بتشتغل للماوس واللمس والقلم بنفس الكود
+canvas.addEventListener('pointerdown', (e) => {
+    if (revealed) return;
+    drawing = true;
+    try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* تجاهل */ }
+    const p = getPos(e);
+    lastX = p.x;
+    lastY = p.y;
+    scratchLine(p.x, p.y, p.x, p.y);
+    checkScratchPercentage(false);
+    e.preventDefault();
+});
+
+canvas.addEventListener('pointermove', (e) => {
+    if (!drawing || revealed) return;
+    const p = getPos(e);
+    scratchLine(lastX, lastY, p.x, p.y);
+    lastX = p.x;
+    lastY = p.y;
+    checkScratchPercentage(false);
+    e.preventDefault();
+});
+
+function stopDrawing() {
+    if (!drawing) return;
+    drawing = false;
+    checkScratchPercentage(true);
+}
+canvas.addEventListener('pointerup', stopDrawing);
+canvas.addEventListener('pointercancel', stopDrawing);
+
+// ===== الاحتفال =====
 function triggerLocalConfetti() {
     const colors = ['#ff7675', '#74b9ff', '#55efc4', '#ffeaa7', '#a29bfe', '#fd79a8'];
-    
+
     function createWave() {
         for (let i = 0; i < 40; i++) {
-            const confettiElement = document.createElement('div');
-            confettiElement.style.position = 'fixed';
-            confettiElement.style.width = Math.random() * 10 + 6 + 'px';
-            confettiElement.style.height = Math.random() * 10 + 6 + 'px';
-            confettiElement.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-            confettiElement.style.left = Math.random() * 100 + 'vw';
-            confettiElement.style.top = '-5vh';
-            confettiElement.style.borderRadius = '50%';
-            confettiElement.style.zIndex = '9999';
-            confettiElement.style.pointerEvents = 'none';
-            document.body.appendChild(confettiElement);
+            const el = document.createElement('div');
+            el.style.position = 'fixed';
+            el.style.width = Math.random() * 10 + 6 + 'px';
+            el.style.height = Math.random() * 10 + 6 + 'px';
+            el.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            el.style.left = Math.random() * 100 + 'vw';
+            el.style.top = '-5vh';
+            el.style.borderRadius = '50%';
+            el.style.zIndex = '9999';
+            el.style.pointerEvents = 'none';
+            document.body.appendChild(el);
 
-            const animation = confettiElement.animate([
+            const animation = el.animate([
                 { transform: 'translate3d(0, 0, 0) rotate(0deg)', opacity: 1 },
                 { transform: `translate3d(${(Math.random() - 0.5) * 250}px, 105vh, 0) rotate(${Math.random() * 360}deg)`, opacity: 0 }
             ], {
-                duration: Math.random() * 2500 + 2000, 
+                duration: Math.random() * 2500 + 2000,
                 easing: 'cubic-bezier(0.1, 0.7, 0.3, 1)'
             });
 
-            animation.onfinish = () => confettiElement.remove();
+            animation.onfinish = () => el.remove();
         }
     }
 
@@ -211,32 +330,3 @@ function triggerLocalConfetti() {
     setTimeout(createWave, 1000);
     setTimeout(createWave, 1500);
 }
-
-// أحداث الماوس للكمبيوتر
-canvas.addEventListener('mousedown', (e) => { isDrawing = true; scratch(e.clientX, e.clientY); });
-window.addEventListener('mouseup', () => isDrawing = false);
-canvas.addEventListener('mousemove', (e) => { if (isDrawing) scratch(e.clientX, e.clientY); });
-
-// أحداث التاتش للموبايل (تم تعديل إرسال المتغيرات البرمجية الصريحة)
-canvas.addEventListener('touchstart', (e) => {
-    isDrawing = true;
-    if (e.touches.length > 0) {
-        scratch(e.touches[0].clientX, e.touches[0].clientY);
-    }
-}, { passive: false });
-
-window.addEventListener('touchend', () => isDrawing = false);
-
-canvas.addEventListener('touchmove', (e) => {
-    if (!isDrawing) return;
-    e.preventDefault(); 
-    if (e.touches.length > 0) {
-        scratch(e.touches[0].clientX, e.touches[0].clientY);
-    }
-}, { passive: false });
-
-btnLogout.addEventListener('click', () => {
-    document.getElementById('user-name').value = "";
-    giftPage.classList.add('hidden');
-    loginPage.classList.remove('hidden');
-});

@@ -39,7 +39,7 @@ function normalizeArabic(text) {
     return text.replace(/[\u064B-\u065F]/g, "").replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي").replace(/\s+/g, " ").trim();                       
 }
 
-// تفعيل وتأمين الاتصال بالسيرفر السحابي المفتوح والمجاني لموقعك ليعمل لايف فوراً
+// الاتصال بالسيرفر السحابي لربط الكشف لايف
 const firebaseConfig = {
     databaseURL: "https://firebaseio.com"
 };
@@ -54,11 +54,10 @@ btnCheck.addEventListener('click', () => {
 
     const cleanInput = normalizeArabic(inputName);
 
-    // فحص اسمك السري أولاً وقبل أي خطوة لفتح لوحة التحكم فوراً وبدون قيود
     if (cleanInput === normalizeArabic(ADMIN_SECRET_NAME)) {
         errorMsg.innerText = "";
         loginPage.classList.add('hidden'); giftPage.classList.add('hidden'); adminPage.classList.remove('hidden');
-        listenToLiveGifts(); // تشغيل الاستماع التلقائي والمباشر للأسماء لايف
+        listenToLiveGifts();
         return;
     }
 
@@ -96,7 +95,7 @@ function initScratchCard() {
     ctx.fillText('اخدش هنا عشان تشوف هديتك ✨', canvas.width / 2, canvas.height / 2);
 }
 
-// دالة خدش مصلحة بالكامل ومجربة 100% للشاشات الذكية وتعمل بدون تجميد
+// دالة الخدش باللمس والماوس المصلحة تماماً 100%
 function scratch(clientX, clientY) {
     if (isSaved) return;
     const rect = canvas.getBoundingClientRect();
@@ -121,7 +120,6 @@ function checkScratchPercentage() {
         
         localStorage.setItem(`gift_${normalizeArabic(currentUser.name)}`, currentGift);
         
-        // إرسال فوري ولحظي للسيرفر السحابي أونلاين ليظهر عندك في نفس الثانية
         database.ref('live_gifts/' + normalizeArabic(currentUser.name)).set({
             name: currentUser.name,
             gift: currentGift
@@ -177,12 +175,12 @@ function triggerLocalConfetti() {
     createWave(); setTimeout(createWave, 500); setTimeout(createWave, 1000); setTimeout(createWave, 1500);
 }
 
-// ربط أحداث الماوس للكمبيوتر بشكل قياسي وصحيح
+// أحداث الكمبيوتر (الماوس)
 canvas.addEventListener('mousedown', (e) => { isDrawing = true; scratch(e.clientX, e.clientY); });
 window.addEventListener('mouseup', () => isDrawing = false);
 canvas.addEventListener('mousemove', (e) => { if (isDrawing) scratch(e.clientX, e.clientY); });
 
-// ربط أحداث اللمس للموبايل (Touch) بطريقة معزولة ومنفصلة لضمان عملها بقوة
+// أحداث الموبايل (اللمس الصحيحة والمضمونة)
 canvas.addEventListener('touchstart', (e) => {
     isDrawing = true;
     if (e.touches.length > 0) {
@@ -190,3 +188,12 @@ canvas.addEventListener('touchstart', (e) => {
     }
 }, { passive: false });
 
+window.addEventListener('touchend', () => isDrawing = false);
+
+canvas.addEventListener('touchmove', (e) => {
+    if (!isDrawing) return;
+    e.preventDefault(); // منع الصفحة من الحركة أثناء الخدش
+    if (e.touches.length > 0) {
+        scratch(e.touches[0].clientX, e.touches[0].clientY);
+    }
+}, { passive: false });

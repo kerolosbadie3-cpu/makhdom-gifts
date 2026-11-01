@@ -12,6 +12,7 @@ body {
 .container {
     width: 95%;
     max-width: 420px;
+    position: relative; /* لضبط مكان النقاط بالنسبة للحاوية */
 }
 
 .card {
@@ -24,18 +25,23 @@ body {
     width: 100%;
 }
 
-/* تنسيق الثلاث نقاط السرية - باهتة ومخفية تماماً في أعلى يسار الكارت */
+/* تنسيق النقاط الثلاث الجديد: باللون الأسود وظاهرة بنسبة خفيفة جداً في الحتة البنفسجية فوق الكارت */
 .secret-dots {
     position: absolute;
-    top: 12px;
-    left: 15px;
-    font-size: 20px;
-    color: #fcfcfc; /* لون باهت وقريب جداً من خلفية الكارت البيضاء لإخفائه */
+    top: -35px; /* رفعها فوق الكارت الأبيض مباشرة */
+    left: 10px;  /* وضعها على الشمال */
+    font-size: 28px;
+    color: #2d3436;
+    opacity: 0.25; /* الشفافية السحرية: تجعلها سوداء باهتة مش باينة أوي للأولاد */
     cursor: pointer;
-    padding: 5px 10px;
+    padding: 5px 15px;
     user-select: none;
-    z-index: 10;
+    z-index: 99;
     transition: 0.2s;
+}
+
+.secret-dots:hover {
+    opacity: 0.6; /* تظهر بوضوح أكبر فقط عند وقوف الماوس عليها */
 }
 
 h2 { color: #2d3436; margin-bottom: 10px; font-size: 22px; }

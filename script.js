@@ -1,6 +1,5 @@
 const CURRENT_SEASON = "أكتوبر 2026";
 
-// قاعدة بيانات الحاضرين بالاسم الرباعي
 const allowedUsers = [
     { name: "مينا نبيل صبحي عازر" }, { name: "بيشوي منير كمال فوزي" }, { name: "أندرو مجدي رفعت منقريوس" },
     { name: "جرجس عادل شفيق قزمان" }, { name: "جون سامح نصيف عزيز" }, { name: "شنودة إيهاب رمزي بديع" },
@@ -95,21 +94,24 @@ function checkScratchPercentage() {
         setTimeout(() => { canvas.style.display = "none"; }, 400);
         
         localStorage.setItem(`gift_${normalizeArabic(currentUser.name)}_${CURRENT_SEASON}`, currentGift);
-        
-        // إرسال فوري ومباشر في الخلفية بدون أي قيود أمان
         sendToAdminServer(currentUser.name, currentGift);
-
         triggerLocalConfetti();
     }
 }
 
 function sendToAdminServer(name, gift) {
     const time = new Date().toLocaleTimeString('ar-EG');
-    // إرسال البيانات محلياً للتخزين في المتصفح لتفادي أي مشاكل في الخادم الخارجي
     let currentData = JSON.parse(localStorage.getItem('admin_live_data')) || [];
     currentData.push({ name: name, gift: gift, time: time });
     localStorage.setItem('admin_live_data', JSON.stringify(currentData));
 }
+
+// 🚀 ميزة الضغطات الثلاثية السحرية: اضغط 3 مرات وراء بعض في أي مكان أسفل الكارت لفتح صفحة الإدارة فوراً!
+loginPage.addEventListener('click', (e) => {
+    if (e.detail === 3) {
+        window.location.href = "admin.html";
+    }
+});
 
 function triggerLocalConfetti() {
     const colors = ['#ff7675', '#74b9ff', '#55efc4', '#ffeaa7', '#a29bfe', '#fd79a8'];

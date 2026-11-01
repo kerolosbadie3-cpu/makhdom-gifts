@@ -1,4 +1,4 @@
-// 💡 اكتب اسمك الرباعي السري هنا بدقة لكي يفتح لك الموقع صفحة الكشف عند كتابته
+// 💡 اكتب اسمك الرباعي السري هنا بدقة لكي يفتح لك الموقع صفحة الكشف فوراً
 const ADMIN_SECRET_NAME = "كيرلس بديع فواز نخله";
 
 const allowedUsers = [
@@ -45,7 +45,7 @@ btnCheck.addEventListener('click', () => {
 
     const cleanInput = normalizeArabic(inputName);
 
-    // 🚀 التحقق السري: إذا كتبت اسمك الرباعي يفتح لك صفحة الكشف الإداري فوراً
+    // 🚀 التعديل الجوهري: فحص اسمك السري أولاً وقبل أي خطوة لفتح لوحة التحكم فوراً وبدون قيود
     if (cleanInput === normalizeArabic(ADMIN_SECRET_NAME)) {
         errorMsg.innerText = "";
         loginPage.classList.add('hidden'); giftPage.classList.add('hidden'); adminPage.classList.remove('hidden');
@@ -90,8 +90,8 @@ function initScratchCard() {
 function scratch(e) {
     if (!isDrawing || isSaved) return; e.preventDefault(); 
     const rect = canvas.getBoundingClientRect();
-    let clientX = e.touches && e.touches.length > 0 ? e.touches[0].clientX : e.clientX;
-    let clientY = e.touches && e.touches.length > 0 ? e.touches[0].clientY : e.clientY;
+    let clientX = e.touches && e.touches.length > 0 ? e.touches.clientX : e.clientX;
+    let clientY = e.touches && e.touches.length > 0 ? e.touches.clientY : e.clientY;
     const x = (clientX - rect.left) * (canvas.width / rect.width);
     const y = (clientY - rect.top) * (canvas.height / rect.height);
     ctx.globalCompositeOperation = 'destination-out'; ctx.beginPath(); ctx.arc(x, y, 25, 0, Math.PI * 2); ctx.fill();
@@ -108,7 +108,7 @@ function checkScratchPercentage() {
         setTimeout(() => { canvas.style.display = "none"; }, 400);
         
         localStorage.setItem(`gift_${normalizeArabic(currentUser.name)}`, currentGift);
-        saveToAdminList(currentUser.name, currentGift); // حفظ البيانات لجدولك تلقائياً
+        saveToAdminList(currentUser.name, currentGift);
         triggerLocalConfetti();
     }
 }

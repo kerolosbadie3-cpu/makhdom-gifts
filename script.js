@@ -22,6 +22,7 @@ const loginPage = document.getElementById('login-page');
 const giftPage = document.getElementById('gift-page');
 const btnCheck = document.getElementById('btn-check');
 const btnLogout = document.getElementById('btn-logout');
+const secretDotsBtn = document.getElementById('secret-dots-btn');
 const errorMsg = document.getElementById('error-msg');
 const welcomeUser = document.getElementById('welcome-user');
 const giftResult = document.getElementById('gift-result');
@@ -60,8 +61,6 @@ btnCheck.addEventListener('click', () => {
             currentGift = gifts[randomIndex]; giftResult.innerText = currentGift;
             scratchInstruction.innerText = "امسح واخدش المستطيل الرمادي اللي تحت عشان تكشف عن هديتك! 👇";
             isSaved = false; canvas.style.display = "block"; canvas.style.opacity = 1; 
-            
-            // تهيئة مرنة وبأبعاد صحيحة فورية متجاوبة تناسب شاشات الهواتف
             setTimeout(initScratchCard, 50);
         }
     } else {
@@ -91,16 +90,14 @@ function scratch(e) {
     
     const rect = canvas.getBoundingClientRect();
     let clientX, clientY;
-    
     if (e.touches && e.touches.length > 0) {
-        clientX = e.touches[0].clientX; // تصحيح جلب اللمس بدقة بالغة لشاشات الموبايل
-        clientY = e.touches[0].clientY;
+        clientX = e.touches.clientX;
+        clientY = e.touches.clientY;
     } else {
         clientX = e.clientX;
         clientY = e.clientY;
     }
     
-    // معادلة الحساب الدقيق للمسح المتجاوب لتناسب اللمس على الهواتف
     const x = (clientX - rect.left) * (canvas.width / rect.width);
     const y = (clientY - rect.top) * (canvas.height / rect.height);
     
@@ -121,7 +118,7 @@ function checkScratchPercentage() {
         setTimeout(() => { canvas.style.display = "none"; }, 400);
         
         localStorage.setItem(`gift_${normalizeArabic(currentUser.name)}_${CURRENT_SEASON}`, currentGift);
-        sendToAdminServer(currentUser.name, currentGift); // حفظ البيانات لجدولك السري
+        sendToAdminServer(currentUser.name, currentGift);
         triggerLocalConfetti();
     }
 }
@@ -133,11 +130,9 @@ function sendToAdminServer(name, gift) {
     localStorage.setItem('admin_live_data', JSON.stringify(currentData));
 }
 
-// 🚀 ميزة الضغطات الثلاثية السحرية لفتح صفحتك وجدولك السري بلمحة بصر
-loginPage.addEventListener('click', (e) => {
-    if (e.detail === 3) {
-        window.location.href = "admin.html";
-    }
+// فتح صفحة الإدارة السرية عند الضغط المباشر على زر النقاط الثلاثة
+secretDotsBtn.addEventListener('click', () => {
+    window.location.href = "admin.html";
 });
 
 function triggerLocalConfetti() {
@@ -149,7 +144,7 @@ function triggerLocalConfetti() {
             confettiElement.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)]; confettiElement.style.left = Math.random() * 100 + 'vw'; confettiElement.style.top = '-5vh';
             confettiElement.style.borderRadius = '50%'; confettiElement.style.zIndex = '9999'; confettiElement.style.pointerEvents = 'none'; document.body.appendChild(confettiElement);
             const animation = confettiElement.animate([
-                { transform: 'translate3d(0, 0, 0) rotate(0deg)', opacity: 1 }, { transform: `translate3d(${(Math.random() - 0.5) * 250}px, 105vh, 0) rotate(${Math.random() * 360}deg)`, opacity: 0 }
+                { transform: 'translate3d(0, 0, 0) rotate(0deg)', opacity: 1 }, { transform: `translate3d(${(Math.random() - 0.5) * 250}px, 105vh, 0) rotate(${Math.random() * 360}deg)', opacity: 0 }
             ], { duration: Math.random() * 2500 + 2000, easing: 'cubic-bezier(0.1, 0.7, 0.3, 1)' });
             animation.onfinish = () => confettiElement.remove();
         }

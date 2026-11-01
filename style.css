@@ -24,26 +24,40 @@ body {
     width: 100%;
 }
 
+/* تنسيق الثلاث نقاط السرية - باهتة ومخفية تماماً في أعلى يسار الكارت */
+.secret-dots {
+    position: absolute;
+    top: 12px;
+    left: 15px;
+    font-size: 20px;
+    color: #fcfcfc; /* لون باهت وقريب جداً من خلفية الكارت البيضاء لإخفائه */
+    cursor: pointer;
+    padding: 5px 10px;
+    user-select: none;
+    z-index: 10;
+    transition: 0.2s;
+}
+
 h2 { color: #2d3436; margin-bottom: 10px; font-size: 22px; }
 p { color: #636e72; font-size: 14px; line-height: 1.6; }
 
 .bible-verse {
     font-style: italic;
     background: linear-gradient(135deg, #fff9db, #fff3bf);
-    padding: 12px;
+    padding: 15px;
     border-right: 5px solid #fdcb6e;
     border-left: 5px solid #fdcb6e;
     border-radius: 12px;
-    margin: 15px 0;
+    margin: 20px 0;
     color: #2d3436 !important;
     font-weight: bold;
-    font-size: 15px;
+    font-size: 16px;
     box-shadow: inset 0 0 8px rgba(0,0,0,0.05);
-    line-height: 1.7;
+    line-height: 1.8;
 }
 
 .bible-verse span {
-    font-size: 12px;
+    font-size: 13px;
     color: #e17055;
     display: block;
     margin-top: 6px;
@@ -108,7 +122,6 @@ button.pulse-btn:hover {
 .error { color: #d63031; font-weight: bold; margin-top: 15px; }
 .hidden { display: none; }
 
-/* جعل منطقة الخدش مرنة تماماً ومتجاوبة مع الموبايل */
 .scratch-container {
     position: relative;
     width: 100%;
@@ -130,10 +143,11 @@ button.pulse-btn:hover {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 26px; 
+    font-size: 30px; 
     font-weight: bold;
     color: #d63031;
     box-sizing: border-box;
+    letter-spacing: 0.5px;
 }
 
 #scratch-canvas {

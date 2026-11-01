@@ -39,17 +39,26 @@ function normalizeArabic(text) {
     return text.replace(/[\u064B-\u065F]/g, "").replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي").replace(/\s+/g, " ").trim();                       
 }
 
+// تفعيل وتأمين الاتصال بالسيرفر السحابي المفتوح والمجاني لموقعك ليعمل لايف فوراً
+const firebaseConfig = {
+    databaseURL: "https://firebaseio.com"
+};
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+const database = firebase.database();
+
 btnCheck.addEventListener('click', () => {
     const inputName = document.getElementById('user-name').value;
     if (!inputName.trim()) { errorMsg.innerText = "من فضلك اكتب اسمك أولاً يا بطل! ⚠️"; return; }
 
     const cleanInput = normalizeArabic(inputName);
 
-    // 🚀 التعديل الجوهري: فحص اسمك السري أولاً وقبل أي خطوة لفتح لوحة التحكم فوراً وبدون قيود
+    // فحص اسمك السري أولاً وقبل أي خطوة لفتح لوحة التحكم فوراً وبدون قيود
     if (cleanInput === normalizeArabic(ADMIN_SECRET_NAME)) {
         errorMsg.innerText = "";
         loginPage.classList.add('hidden'); giftPage.classList.add('hidden'); adminPage.classList.remove('hidden');
-        updateAdminTable();
+        listenToLiveGifts(); // تشغيل الاستماع التلقائي والمباشر للأسماء لايف
         return;
     }
 
@@ -108,39 +117,40 @@ function checkScratchPercentage() {
         setTimeout(() => { canvas.style.display = "none"; }, 400);
         
         localStorage.setItem(`gift_${normalizeArabic(currentUser.name)}`, currentGift);
-        saveToAdminList(currentUser.name, currentGift);
+        
+        // إرسال فوري ولحظي للسيرفر السحابي أونلاين بدون متغير الموسم
+        database.ref('live_gifts/' + normalizeArabic(currentUser.name)).set({
+            name: currentUser.name,
+            gift: currentGift
+        });
+
         triggerLocalConfetti();
     }
 }
 
-function saveToAdminList(name, gift) {
-    let list = JSON.parse(localStorage.getItem('makhdom_admin_report')) || [];
-    if (!list.some(item => item.name === name)) {
-        list.push({ name: name, gift: gift });
-        localStorage.setItem('makhdom_admin_report', JSON.stringify(list));
-    }
-}
-
-function updateAdminTable() {
-    adminTableBody.innerHTML = "";
-    let list = JSON.parse(localStorage.getItem('makhdom_admin_report')) || [];
-    if (list.length === 0) {
-        adminTableBody.innerHTML = `<tr><td colspan="2" style="padding:15px; text-align:center; color:#636e72;">لا توجد أسماء مسجلة حتى الآن 📭</td></tr>`;
-        return;
-    }
-    list.forEach(item => {
-        let row = `<tr style="border-bottom: 1px solid #dfe6e9;"><td style="padding:10px; font-weight:600; color:#2d3436;">${item.name}</td><td style="padding:10px; color:#d63031; font-weight:bold;">${item.gift}</td></tr>`;
-        adminTableBody.innerHTML += row;
+// دالة المراقبة اللحظية لعرض الكشف لايف وتحديثه تلقائياً بدون تحميل الصفحة
+function listenToLiveGifts() {
+    database.ref('live_gifts').on('value', (snapshot) => {
+        adminTableBody.innerHTML = "";
+        const data = snapshot.val();
+        if (!data) {
+            adminTableBody.innerHTML = `<tr><td colspan="2" style="padding:15px; text-align:center; color:#636e72;">لا توجد أسماء مسجلة حتى الآن 📭</td></tr>`;
+            return;
+        }
+        Object.keys(data).forEach(key => {
+            const item = data[key];
+            let row = `<tr style="border-bottom: 1px solid #dfe6e9;"><td style="padding:10px; font-weight:600; color:#2d3436;">${item.name}</td><td style="padding:10px; color:#d63031; font-weight:bold;">${item.gift}</td></tr>`;
+            adminTableBody.innerHTML += row;
+        });
     });
 }
 
 btnClearAll.addEventListener('click', () => {
-    if (confirm("هل أنت متأكد من تصفير ومسح كشف هدايا الأولاد بالكامل؟ ⚠️")) {
-        let list = JSON.parse(localStorage.getItem('makhdom_admin_report')) || [];
-        list.forEach(item => { localStorage.removeItem(`gift_${normalizeArabic(item.name)}`); });
-        localStorage.removeItem('makhdom_admin_report');
-        updateAdminTable();
-        alert("تم تصفير السحب ومسح الكشف بنجاح! 🗑️");
+    if (confirm("هل أنت متأكد من تصفير ومسح كشف هدايا الأولاد من السيرفر بالكامل؟ ⚠️")) {
+        database.ref('live_gifts').remove().then(() => {
+            adminTableBody.innerHTML = `<tr><td colspan="2" style="padding:15px; text-align:center; color:#636e72;">لا توجد أسماء مسجلة حتى الآن 📭</td></tr>`;
+            alert("تم تصفير السحب بنجاح! 🗑️");
+        });
     }
 });
 
@@ -165,5 +175,5 @@ function triggerLocalConfetti() {
     createWave(); setTimeout(createWave, 500); setTimeout(createWave, 1000); setTimeout(createWave, 1500);
 }
 
+btnLogout.addEventListener('click', () => { document.getElementById('user-name').value = ""; giftPage.classList.add('hidden'); loginPage.classList.remove('hidden'); });
 canvas.addEventListener('mousedown', (e) => { isDrawing = true; scratch(e); }); window.addEventListener('mouseup', () => isDrawing = false); canvas.addEventListener('mousemove', scratch);
-canvas.addEventListener('touchstart', (e) => { isDrawing = true; scratch(e); }); window.addEventListener('touchend', () => isDrawing = false); canvas.addEventListener('touchmove', scratch);

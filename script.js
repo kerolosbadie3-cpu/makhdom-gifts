@@ -99,8 +99,17 @@ function initScratchCard() {
 function scratch(e) {
     if (!isDrawing || isSaved) return; e.preventDefault(); 
     const rect = canvas.getBoundingClientRect();
-    let clientX = e.touches && e.touches.length > 0 ? e.touches.clientX : e.clientX;
-    let clientY = e.touches && e.touches.length > 0 ? e.touches.clientY : e.clientY;
+    
+    // تم تصحيح سطر جلب إحداثيات اللمس الفعلي للموبايل والماوس بدقة بالغة وبدون أي عطل
+    let clientX, clientY;
+    if (e.touches && e.touches.length > 0) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+    } else {
+        clientX = e.clientX;
+        clientY = e.clientY;
+    }
+    
     const x = (clientX - rect.left) * (canvas.width / rect.width);
     const y = (clientY - rect.top) * (canvas.height / rect.height);
     ctx.globalCompositeOperation = 'destination-out'; ctx.beginPath(); ctx.arc(x, y, 25, 0, Math.PI * 2); ctx.fill();
@@ -118,7 +127,7 @@ function checkScratchPercentage() {
         
         localStorage.setItem(`gift_${normalizeArabic(currentUser.name)}`, currentGift);
         
-        // إرسال فوري ولحظي للسيرفر السحابي أونلاين بدون متغير الموسم
+        // إرسال فوري ولحظي للسيرفر السحابي أونلاين ليظهر عندك في نفس الثانية
         database.ref('live_gifts/' + normalizeArabic(currentUser.name)).set({
             name: currentUser.name,
             gift: currentGift
@@ -128,7 +137,6 @@ function checkScratchPercentage() {
     }
 }
 
-// دالة المراقبة اللحظية لعرض الكشف لايف وتحديثه تلقائياً بدون تحميل الصفحة
 function listenToLiveGifts() {
     database.ref('live_gifts').on('value', (snapshot) => {
         adminTableBody.innerHTML = "";
@@ -175,5 +183,4 @@ function triggerLocalConfetti() {
     createWave(); setTimeout(createWave, 500); setTimeout(createWave, 1000); setTimeout(createWave, 1500);
 }
 
-btnLogout.addEventListener('click', () => { document.getElementById('user-name').value = ""; giftPage.classList.add('hidden'); loginPage.classList.remove('hidden'); });
 canvas.addEventListener('mousedown', (e) => { isDrawing = true; scratch(e); }); window.addEventListener('mouseup', () => isDrawing = false); canvas.addEventListener('mousemove', scratch);

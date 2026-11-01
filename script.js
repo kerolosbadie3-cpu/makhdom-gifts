@@ -19,13 +19,9 @@ let currentUser = null; let currentGift = ""; let isDrawing = false; let isSaved
 
 const loginPage = document.getElementById('login-page');
 const giftPage = document.getElementById('gift-page');
-const adminPage = document.getElementById('admin-page');
 const btnCheck = document.getElementById('btn-check');
 const btnLogout = document.getElementById('btn-logout');
 const secretDotsBtn = document.getElementById('secret-dots-btn');
-const btnCloseAdmin = document.getElementById('btn-close-admin');
-const btnClearAll = document.getElementById('btn-clear-all');
-const adminTableBody = document.getElementById('admin-table-body');
 const errorMsg = document.getElementById('error-msg');
 const welcomeUser = document.getElementById('welcome-user');
 const giftResult = document.getElementById('gift-result');
@@ -44,14 +40,22 @@ btnCheck.addEventListener('click', () => {
     if (!inputName.trim()) { errorMsg.innerText = "من فضلك اكتب اسمك أولاً يا بطل! ⚠️"; return; }
 
     const cleanInput = normalizeArabic(inputName);
+    const inputWords = cleanInput.split(" ");
+    const inputFirstWord = inputWords[0]; // تصحيح جلب الكلمة الأولى كنص صريح وليس كمصفوفة
+
     const userFound = allowedUsers.find(user => {
         const cleanDBName = normalizeArabic(user.name);
-        return cleanDBName.includes(cleanInput) || cleanInput.includes(cleanDBName);
+        const dbWords = cleanDBName.split(" ");
+        const dbFirstWord = dbWords[0];
+
+        if (inputFirstWord !== dbFirstWord) return false;
+
+        return cleanDBName.includes(cleanInput) || cleanInput.includes(dbFirstWord);
     });
 
     if (userFound) {
         errorMsg.innerText = ""; currentUser = userFound;
-        loginPage.classList.add('hidden'); giftPage.classList.remove('hidden'); adminPage.classList.add('hidden');
+        loginPage.classList.add('hidden'); giftPage.classList.remove('hidden');
         welcomeUser.innerHTML = `مبروووووك يا بطل 🎉🥳 <br> <span style="font-size: 20px; display: block; margin-top: 8px; color: #0984e3;">يا ${userFound.name}</span>`;
 
         const savedGift = localStorage.getItem(`gift_${normalizeArabic(userFound.name)}_${CURRENT_SEASON}`);
@@ -81,8 +85,8 @@ function initScratchCard() {
 function scratch(e) {
     if (!isDrawing || isSaved) return; e.preventDefault(); 
     const rect = canvas.getBoundingClientRect();
-    let clientX = e.touches && e.touches.length > 0 ? e.touches.clientX : e.clientX;
-    let clientY = e.touches && e.touches.length > 0 ? e.touches.clientY : e.clientY;
+    let clientX = e.touches && e.touches.length > 0 ? e.touches.touches[0].clientX : e.clientX;
+    let clientY = e.touches && e.touches.length > 0 ? e.touches.touches[0].clientY : e.clientY;
     const x = (clientX - rect.left) * (canvas.width / rect.width);
     const y = (clientY - rect.top) * (canvas.height / rect.height);
     ctx.globalCompositeOperation = 'destination-out'; ctx.beginPath(); ctx.arc(x, y, 25, 0, Math.PI * 2); ctx.fill();
@@ -106,44 +110,17 @@ function checkScratchPercentage() {
 
 function saveToAdminList(name, gift) {
     let list = JSON.parse(localStorage.getItem(`admin_list_${CURRENT_SEASON}`)) || [];
+    const time = new Date().toLocaleTimeString('ar-EG');
     if (!list.some(item => item.name === name)) {
-        list.push({ name: name, gift: gift });
+        list.push({ name: name, gift: gift, time: time });
         localStorage.setItem(`admin_list_${CURRENT_SEASON}`, JSON.stringify(list));
     }
 }
 
-// 🚀 فتح اللوحة المدمجة الفورية عند الضغط على الـ 3 نقاط السوداء
+// التوجيه المباشر والمضمون لصفحة admin.html المنفصلة بالكامل
 secretDotsBtn.addEventListener('click', () => {
-    loginPage.classList.add('hidden'); giftPage.classList.add('hidden'); adminPage.classList.remove('hidden');
-    updateAdminTable();
+    window.location.href = "admin.html";
 });
-
-btnCloseAdmin.addEventListener('click', () => {
-    adminPage.classList.add('hidden'); loginPage.classList.remove('hidden');
-});
-
-btnClearAll.addEventListener('click', () => {
-    if (confirm("هل أنت متأكد من تصفير ومسح كشف هدايا الأولاد بالكامل؟ ⚠️")) {
-        let list = JSON.parse(localStorage.getItem(`admin_list_${CURRENT_SEASON}`)) || [];
-        list.forEach(item => { localStorage.removeItem(`gift_${normalizeArabic(item.name)}_${CURRENT_SEASON}`); });
-        localStorage.removeItem(`admin_list_${CURRENT_SEASON}`);
-        updateAdminTable();
-        alert("تم تصفير السحب ومسح الكشف بنجاح! 🗑️");
-    }
-});
-
-function updateAdminTable() {
-    adminTableBody.innerHTML = "";
-    let list = JSON.parse(localStorage.getItem(`admin_list_${CURRENT_SEASON}`)) || [];
-    if (list.length === 0) {
-        adminTableBody.innerHTML = `<tr><td colspan="2" style="padding:15px; text-align:center; color:#636e72;">لا توجد أسماء مسجلة حتى الآن 📭</td></tr>`;
-        return;
-    }
-    list.forEach(item => {
-        let row = `<tr style="border-bottom: 1px solid #dfe6e9;"><td style="padding:10px; font-weight:600; color:#2d3436;">${item.name}</td><td style="padding:10px; color:#d63031; font-weight:bold;">${item.gift}</td></tr>`;
-        adminTableBody.innerHTML += row;
-    });
-}
 
 function triggerLocalConfetti() {
     const colors = ['#ff7675', '#74b9ff', '#55efc4', '#ffeaa7', '#a29bfe', '#fd79a8'];

@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مفاجأة خدمة إعدادي 🎉</title>
-    <link rel="stylesheet" href="style.css?v=12">
+    <link rel="stylesheet" href="style.css?v=13">
 </head>
 <body>
 
     <div class="container">
-        <!-- النقاط الثلاث السوداء الواضحة فوق الكارت الأبيض -->
+        <!-- النقاط الثلاث السوداء الثابتة فوق الكارت على اليسار -->
         <div id="secret-dots-btn" class="secret-dots">⁝</div>
 
         <!-- 1. صفحة الدخول والتحقق -->
@@ -38,31 +38,8 @@
 
             <button id="btn-logout" class="back-btn">دخول اسم آخر 🔄</button>
         </div>
-
-        <!-- 3. صفحة لوحة الإدارة المدمجة سرّياً للخدام -->
-        <div id="admin-page" class="card hidden">
-            <h2>📊 كشف هدايا الأولاد الحالية</h2>
-            <p>دي قائمة تلقائية بالأسماء اللي سحبت كروت وجوائزها:</p>
-            
-            <div style="max-height: 250px; overflow-y: auto; margin: 15px 0; border: 1px solid #dfe6e9; border-radius: 10px;">
-                <table style="width:100%; border-collapse: collapse; text-align:right; font-size:14px;">
-                    <thead>
-                        <tr style="background-color:#f1f2f6; color:#2d3436;">
-                            <th style="padding:10px; border-bottom:2px solid #dfe6e9;">الاسم الرباعي</th>
-                            <th style="padding:10px; border-bottom:2px solid #dfe6e9;">الهدية</th>
-                        </tr>
-                    </thead>
-                    <tbody id="admin-table-body">
-                        <!-- الأسماء بتنزل هنا تلقائياً -->
-                    </tbody>
-                </table>
-            </div>
-
-            <button id="btn-clear-all" style="background-color:#d63031; padding:10px; margin-bottom:10px;" class="pulse-btn">مسح وتصفير الكشف بالكامل 🗑️</button>
-            <button id="btn-close-admin" class="back-btn" style="margin-top:5px;">العودة لصفحة الحضور 🔙</button>
-        </div>
     </div>
 
-    <script src="script.js?v=12" defer></script>
+    <script src="script.js?v=13" defer></script>
 </body>
 </html>

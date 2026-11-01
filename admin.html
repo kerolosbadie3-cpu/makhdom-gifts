@@ -4,16 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة التحكم السرية لأمين الخدمة ⚙️</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=13">
 </head>
 <body>
 
     <div class="container" style="max-width: 600px;">
         <div class="card">
-            <h2>📊 كشف هدايا الأولاد الفوري</h2>
-            <p>الأسماء بتنزل هنا تلقائياً أول ما الولد يخدش الكارت 👇</p>
+            <h2>📊 كشف هدايا الأولاد الحالي</h2>
+            <p>دي قائمة تلقائية بالأسماء اللي سحبت كروت وجوائزها:</p>
             
-            <div style="max-height: 400px; overflow-y: auto; margin: 20px 0; border: 1px solid #dfe6e9; border-radius: 10px;">
+            <div style="max-height: 350px; overflow-y: auto; margin: 20px 0; border: 1px solid #dfe6e9; border-radius: 10px;">
                 <table style="width:100%; border-collapse: collapse; text-align:right; font-size:15px;">
                     <thead>
                         <tr style="background-color:#f1f2f6; color:#2d3436;">
@@ -23,41 +23,53 @@
                         </tr>
                     </thead>
                     <tbody id="live-table-body">
-                        <tr><td colspan="3" style="padding:20px; text-align:center; color:#636e72;">بانتظار سحب أول ولد... ⏳</td></tr>
+                        <!-- الأسماء بتنزل هنا تلقائياً -->
                     </tbody>
                 </table>
             </div>
 
-            <button id="btn-clear-cloud" style="background-color:#d63031;" class="pulse-btn">تصفير وحذف الكشف لشهر جديد 🗑️</button>
+            <button id="btn-clear-data" style="background-color:#d63031;" class="pulse-btn">تصفير ومسح الكشف بالكامل 🗑️</button>
+            <button id="btn-back-home" class="back-btn" style="margin-top:15px;">العودة لصفحة الحضور 🔙</button>
         </div>
     </div>
 
     <script>
         const tableBody = document.getElementById('live-table-body');
+        const CURRENT_SEASON = "أكتوبر 2026";
 
         function loadData() {
             tableBody.innerHTML = "";
-            const data = JSON.parse(localStorage.getItem('admin_live_data')) || [];
-            if (data.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="3" style="padding:20px; text-align:center; color:#636e72;">الكشف فارغ تماماً حالياً 📭</td></tr>`;
+            let list = JSON.parse(localStorage.getItem(`admin_list_${CURRENT_SEASON}`)) || [];
+            
+            if (list.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="3" style="padding:20px; text-align:center; color:#636e72;">لا توجد أسماء مسجلة حتى الآن 📭</td></tr>`;
                 return;
             }
-            data.forEach(item => {
+            
+            list.forEach(item => {
                 let row = `<tr style="border-bottom: 1px solid #dfe6e9;"><td style="padding:12px; font-weight:600; color:#2d3436;">${item.name}</td><td style="padding:12px; color:#d63031; font-weight:bold;">${item.gift}</td><td style="padding:12px; color:#636e72; font-size:12px;">${item.time}</td></tr>`;
                 tableBody.innerHTML += row;
             });
         }
 
-        // تحديث الكشف تلقائياً كل ثانيتين لعرض الأسماء فوراً
-        setInterval(loadData, 2000);
-        loadData();
-
-        document.getElementById('btn-clear-cloud').addEventListener('click', () => {
-            if (confirm("هل أنت متأكد من مسح كشف الهدايا بالكامل لبدء سحب جديد؟ ⚠️")) {
-                localStorage.removeItem('admin_live_data');
+        document.getElementById('btn-clear-data').addEventListener('click', () => {
+            if (confirm("هل أنت متأكد من مسح وتصفير كشف الهدايا بالكامل لبدء سحب جديد؟ ⚠️")) {
+                let list = JSON.parse(localStorage.getItem(`admin_list_${CURRENT_SEASON}`)) || [];
+                list.forEach(item => {
+                    let cleanName = item.name.replace(/[\u064B-\u065F]/g, "").replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "yi").replace(/\s+/g, " ").trim();
+                    localStorage.removeItem(`gift_${cleanName}_${CURRENT_SEASON}`);
+                });
+                localStorage.removeItem(`admin_list_${CURRENT_SEASON}`);
                 loadData();
+                alert("تم تصفير السحب بنجاح! 🗑️");
             }
         });
+
+        document.getElementById('btn-back-home').addEventListener('click', () => {
+            window.location.href = "index.html";
+        });
+
+        loadData();
     </script>
 </body>
 </html>

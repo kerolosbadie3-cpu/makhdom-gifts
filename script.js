@@ -1,6 +1,5 @@
 const CURRENT_SEASON = "أكتوبر 2026";
 
-// قاعدة بيانات الحاضرين بالاسم الرباعي
 const allowedUsers = [
     { name: "مينا نبيل صبحي عازر" }, { name: "بيشوي منير كمال فوزي" }, { name: "أندرو مجدي رفعت منقريوس" },
     { name: "جرجس عادل شفيق قزمان" }, { name: "جون سامح نصيف عزيز" }, { name: "شنودة إيهاب رمزي بديع" },
@@ -20,9 +19,13 @@ let currentUser = null; let currentGift = ""; let isDrawing = false; let isSaved
 
 const loginPage = document.getElementById('login-page');
 const giftPage = document.getElementById('gift-page');
+const adminPage = document.getElementById('admin-page');
 const btnCheck = document.getElementById('btn-check');
 const btnLogout = document.getElementById('btn-logout');
 const secretDotsBtn = document.getElementById('secret-dots-btn');
+const btnCloseAdmin = document.getElementById('btn-close-admin');
+const btnClearAll = document.getElementById('btn-clear-all');
+const adminTableBody = document.getElementById('admin-table-body');
 const errorMsg = document.getElementById('error-msg');
 const welcomeUser = document.getElementById('welcome-user');
 const giftResult = document.getElementById('gift-result');
@@ -48,7 +51,7 @@ btnCheck.addEventListener('click', () => {
 
     if (userFound) {
         errorMsg.innerText = ""; currentUser = userFound;
-        loginPage.classList.add('hidden'); giftPage.classList.remove('hidden');
+        loginPage.classList.add('hidden'); giftPage.classList.remove('hidden'); adminPage.classList.add('hidden');
         welcomeUser.innerHTML = `مبروووووك يا بطل 🎉🥳 <br> <span style="font-size: 20px; display: block; margin-top: 8px; color: #0984e3;">يا ${userFound.name}</span>`;
 
         const savedGift = localStorage.getItem(`gift_${normalizeArabic(userFound.name)}_${CURRENT_SEASON}`);
@@ -60,8 +63,7 @@ btnCheck.addEventListener('click', () => {
             const randomIndex = Math.floor(Math.random() * gifts.length);
             currentGift = gifts[randomIndex]; giftResult.innerText = currentGift;
             scratchInstruction.innerText = "امسح واخدش المستطيل الرمادي اللي تحت عشان تكشف عن هديتك! 👇";
-            isSaved = false; canvas.style.display = "block"; canvas.style.opacity = 1; 
-            setTimeout(initScratchCard, 50);
+            isSaved = false; canvas.style.display = "block"; canvas.style.opacity = 1; setTimeout(initScratchCard, 50);
         }
     } else {
         errorMsg.innerText = "عاش يا بطل على المحاولة! شد حيلك الجمعة الجاية والتزم بالحضور عشان تدخل سحب الهدايا المرة الجاية 🤍";
@@ -69,42 +71,21 @@ btnCheck.addEventListener('click', () => {
 });
 
 function initScratchCard() {
-    canvas.width = canvas.parentElement.clientWidth || 280;
-    canvas.height = canvas.parentElement.clientHeight || 90;
-    canvas.style.width = "100%";
-    canvas.style.height = "100%";
-
-    ctx.fillStyle = '#b2bec3';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    ctx.font = '16px Segoe UI';
-    ctx.fillStyle = '#ffffff';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
+    canvas.width = canvas.parentElement.clientWidth || 280; canvas.height = canvas.parentElement.clientHeight || 90;
+    canvas.style.width = "100%"; canvas.style.height = "100%";
+    ctx.fillStyle = '#b2bec3'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.font = '16px Segoe UI'; ctx.fillStyle = '#ffffff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillText('اخدش هنا عشان تشوف هديتك ✨', canvas.width / 2, canvas.height / 2);
 }
 
 function scratch(e) {
-    if (!isDrawing || isSaved) return;
-    e.preventDefault(); 
-    
+    if (!isDrawing || isSaved) return; e.preventDefault(); 
     const rect = canvas.getBoundingClientRect();
-    let clientX, clientY;
-    if (e.touches && e.touches.length > 0) {
-        clientX = e.touches.clientX;
-        clientY = e.touches.clientY;
-    } else {
-        clientX = e.clientX;
-        clientY = e.clientY;
-    }
-    
+    let clientX = e.touches && e.touches.length > 0 ? e.touches.clientX : e.clientX;
+    let clientY = e.touches && e.touches.length > 0 ? e.touches.clientY : e.clientY;
     const x = (clientX - rect.left) * (canvas.width / rect.width);
     const y = (clientY - rect.top) * (canvas.height / rect.height);
-    
-    ctx.globalCompositeOperation = 'destination-out';
-    ctx.beginPath();
-    ctx.arc(x, y, 25, 0, Math.PI * 2); 
-    ctx.fill();
+    ctx.globalCompositeOperation = 'destination-out'; ctx.beginPath(); ctx.arc(x, y, 25, 0, Math.PI * 2); ctx.fill();
     checkScratchPercentage();
 }
 
@@ -118,22 +99,51 @@ function checkScratchPercentage() {
         setTimeout(() => { canvas.style.display = "none"; }, 400);
         
         localStorage.setItem(`gift_${normalizeArabic(currentUser.name)}_${CURRENT_SEASON}`, currentGift);
-        sendToAdminServer(currentUser.name, currentGift);
+        saveToAdminList(currentUser.name, currentGift);
         triggerLocalConfetti();
     }
 }
 
-function sendToAdminServer(name, gift) {
-    const time = new Date().toLocaleTimeString('ar-EG');
-    let currentData = JSON.parse(localStorage.getItem('admin_live_data')) || [];
-    currentData.push({ name: name, gift: gift, time: time });
-    localStorage.setItem('admin_live_data', JSON.stringify(currentData));
+function saveToAdminList(name, gift) {
+    let list = JSON.parse(localStorage.getItem(`admin_list_${CURRENT_SEASON}`)) || [];
+    if (!list.some(item => item.name === name)) {
+        list.push({ name: name, gift: gift });
+        localStorage.setItem(`admin_list_${CURRENT_SEASON}`, JSON.stringify(list));
+    }
 }
 
-// فتح صفحة الإدارة السرية عند الضغط المباشر على زر النقاط الثلاثة
+// 🚀 فتح اللوحة المدمجة الفورية عند الضغط على الـ 3 نقاط السوداء
 secretDotsBtn.addEventListener('click', () => {
-    window.location.href = "admin.html";
+    loginPage.classList.add('hidden'); giftPage.classList.add('hidden'); adminPage.classList.remove('hidden');
+    updateAdminTable();
 });
+
+btnCloseAdmin.addEventListener('click', () => {
+    adminPage.classList.add('hidden'); loginPage.classList.remove('hidden');
+});
+
+btnClearAll.addEventListener('click', () => {
+    if (confirm("هل أنت متأكد من تصفير ومسح كشف هدايا الأولاد بالكامل؟ ⚠️")) {
+        let list = JSON.parse(localStorage.getItem(`admin_list_${CURRENT_SEASON}`)) || [];
+        list.forEach(item => { localStorage.removeItem(`gift_${normalizeArabic(item.name)}_${CURRENT_SEASON}`); });
+        localStorage.removeItem(`admin_list_${CURRENT_SEASON}`);
+        updateAdminTable();
+        alert("تم تصفير السحب ومسح الكشف بنجاح! 🗑️");
+    }
+});
+
+function updateAdminTable() {
+    adminTableBody.innerHTML = "";
+    let list = JSON.parse(localStorage.getItem(`admin_list_${CURRENT_SEASON}`)) || [];
+    if (list.length === 0) {
+        adminTableBody.innerHTML = `<tr><td colspan="2" style="padding:15px; text-align:center; color:#636e72;">لا توجد أسماء مسجلة حتى الآن 📭</td></tr>`;
+        return;
+    }
+    list.forEach(item => {
+        let row = `<tr style="border-bottom: 1px solid #dfe6e9;"><td style="padding:10px; font-weight:600; color:#2d3436;">${item.name}</td><td style="padding:10px; color:#d63031; font-weight:bold;">${item.gift}</td></tr>`;
+        adminTableBody.innerHTML += row;
+    });
+}
 
 function triggerLocalConfetti() {
     const colors = ['#ff7675', '#74b9ff', '#55efc4', '#ffeaa7', '#a29bfe', '#fd79a8'];
@@ -144,7 +154,7 @@ function triggerLocalConfetti() {
             confettiElement.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)]; confettiElement.style.left = Math.random() * 100 + 'vw'; confettiElement.style.top = '-5vh';
             confettiElement.style.borderRadius = '50%'; confettiElement.style.zIndex = '9999'; confettiElement.style.pointerEvents = 'none'; document.body.appendChild(confettiElement);
             const animation = confettiElement.animate([
-                { transform: 'translate3d(0, 0, 0) rotate(0deg)', opacity: 1 }, { transform: `translate3d(${(Math.random() - 0.5) * 250}px, 105vh, 0) rotate(${Math.random() * 360}deg)', opacity: 0 }
+                { transform: 'translate3d(0, 0, 0) rotate(0deg)', opacity: 1 }, { transform: `translate3d(${(Math.random() - 0.5) * 250}px, 105vh, 0) rotate(${Math.random() * 360}deg)`, opacity: 0 }
             ], { duration: Math.random() * 2500 + 2000, easing: 'cubic-bezier(0.1, 0.7, 0.3, 1)' });
             animation.onfinish = () => confettiElement.remove();
         }

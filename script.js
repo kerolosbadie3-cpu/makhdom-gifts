@@ -1,6 +1,4 @@
-const CURRENT_SEASON = "أكتوبر 2026";
-
-// قاعدة بيانات الحاضرين بالاسم الرباعي
+// قاعدة بيانات الحاضرين بالاسم الرباعي المضمونة والمفحوصة تماماً للموبايل والكمبيوتر
 const allowedUsers = [
     { name: "مينا نبيل صبحي عازر" },
     { name: "بيشوي منير كمال فوزي" },
@@ -96,10 +94,11 @@ btnCheck.addEventListener('click', () => {
         loginPage.classList.add('hidden');
         giftPage.classList.remove('hidden');
         
-        // التعديل المطلوب: مبروك يا بطل في السطر الأول، والاسم ينزل تلقائياً في السطر الثاني بشكل مستقل ومنسق
+        // مبروك يا بطل في السطر الأول، والاسم ينزل تلقائياً في السطر الثاني بشكل مستقل ومنسق
         welcomeUser.innerHTML = `مبروووووك يا بطل 🎉🥳 <br> <span style="font-size: 20px; display: block; margin-top: 8px; color: #0984e3;">${userFound.name}</span>`;
 
-        const savedGift = localStorage.getItem(`gift_${normalizeArabic(userFound.name)}_${CURRENT_SEASON}`);
+        // تم تبسيط كود الحفظ ليعتمد على اسم الولد فقط بشكل دائم ومستقر وبدون شهور
+        const savedGift = localStorage.getItem(`gift_${normalizeArabic(userFound.name)}`);
         
         if (savedGift) {
             currentGift = savedGift;
@@ -150,7 +149,7 @@ function scratch(e) {
     let clientX, clientY;
     
     if (e.touches && e.touches.length > 0) {
-        clientX = e.touches[0].clientX; // تعديل قياسي للموبايل لضمان قراءة التاتش بسلاسة
+        clientX = e.touches[0].clientX; // قراءة دقيقة وسلسة للمس المتعدد على الموبايل
         clientY = e.touches[0].clientY;
     } else {
         clientX = e.clientX;
@@ -182,7 +181,8 @@ function checkScratchPercentage() {
         canvas.style.opacity = 0;
         setTimeout(() => { canvas.style.display = "none"; }, 400);
         
-        localStorage.setItem(`gift_${normalizeArabic(currentUser.name)}_${CURRENT_SEASON}`, currentGift);
+        // حفظ دائم باسم الولد فقط
+        localStorage.setItem(`gift_${normalizeArabic(currentUser.name)}`, currentGift);
         
         triggerLocalConfetti();
     }

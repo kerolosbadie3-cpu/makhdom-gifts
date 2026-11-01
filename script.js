@@ -96,8 +96,8 @@ btnCheck.addEventListener('click', () => {
         loginPage.classList.add('hidden');
         giftPage.classList.remove('hidden');
         
-        // تم حذف كلمة "يا" المكررة ليظهر الاسم مباشرة في السطر بشكل شيك
-        welcomeUser.innerHTML = `مبروووووك يا بطل 🎉🥳 ${userFound.name}`;
+        // التعديل المطلوب: مبروك يا بطل في السطر الأول، والاسم ينزل تلقائياً في السطر الثاني بشكل مستقل ومنسق
+        welcomeUser.innerHTML = `مبروووووك يا بطل 🎉🥳 <br> <span style="font-size: 20px; display: block; margin-top: 8px; color: #0984e3;">${userFound.name}</span>`;
 
         const savedGift = localStorage.getItem(`gift_${normalizeArabic(userFound.name)}_${CURRENT_SEASON}`);
         
@@ -150,8 +150,8 @@ function scratch(e) {
     let clientX, clientY;
     
     if (e.touches && e.touches.length > 0) {
-        clientX = e.touches.clientX;
-        clientY = e.touches.clientY;
+        clientX = e.touches[0].clientX; // تعديل قياسي للموبايل لضمان قراءة التاتش بسلاسة
+        clientY = e.touches[0].clientY;
     } else {
         clientX = e.clientX;
         clientY = e.clientY;

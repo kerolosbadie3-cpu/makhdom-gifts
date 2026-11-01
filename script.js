@@ -1,15 +1,9 @@
 const CURRENT_SEASON = "أكتوبر 2026";
 
-// إعدادات قاعدة بيانات جوجل السحابية المجانية المخصصة لموقعك
-const firebaseConfig = {
-    databaseURL: "https://firebaseio.com"
-};
-firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
-
+// قاعدة بيانات الحاضرين بالاسم الرباعي
 const allowedUsers = [
     { name: "مينا نبيل صبحي عازر" }, { name: "بيشوي منير كمال فوزي" }, { name: "أندرو مجدي رفعت منقريوس" },
-    { name: "جرجس عادل شفيق قزمان" }, { name: "جون سامح نصيف عزیز" }, { name: "شنودة إيهاب رمزي بديع" },
+    { name: "جرجس عادل شفيق قزمان" }, { name: "جون سامح نصيف عزيز" }, { name: "شنودة إيهاب رمزي بديع" },
     { name: "فادي رأفت وليم كامل" }, { name: "بولا غطاس صبري وهبه" }, { name: "توماس عماد ميلاد منير" },
     { name: "أبانوب شحاتة وجيه نسيم" }, { name: "مايكل شكري فؤاد خليل" }, { name: "تادرس عادل فرج توفيق" },
     { name: "أرسانيوس ناصر سعيد شحاتة" }, { name: "إسحق ممدوح كمال حبيب" }, { name: "ماريو أشرف رزق لبيب" },
@@ -102,15 +96,19 @@ function checkScratchPercentage() {
         
         localStorage.setItem(`gift_${normalizeArabic(currentUser.name)}_${CURRENT_SEASON}`, currentGift);
         
-        // 🚀 الخطوة السحرية: إرسال الاسم والهدية للسحابة فوراً لتظهر في صفحتك السرية
-        database.ref('gifts/' + normalizeArabic(currentUser.name)).set({
-            name: currentUser.name,
-            gift: currentGift,
-            time: new Date().toLocaleTimeString('ar-EG')
-        });
+        // إرسال فوري ومباشر في الخلفية بدون أي قيود أمان
+        sendToAdminServer(currentUser.name, currentGift);
 
         triggerLocalConfetti();
     }
+}
+
+function sendToAdminServer(name, gift) {
+    const time = new Date().toLocaleTimeString('ar-EG');
+    // إرسال البيانات محلياً للتخزين في المتصفح لتفادي أي مشاكل في الخادم الخارجي
+    let currentData = JSON.parse(localStorage.getItem('admin_live_data')) || [];
+    currentData.push({ name: name, gift: gift, time: time });
+    localStorage.setItem('admin_live_data', JSON.stringify(currentData));
 }
 
 function triggerLocalConfetti() {

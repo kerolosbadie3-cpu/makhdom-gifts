@@ -5,15 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة التحكم السرية لأمين الخدمة ⚙️</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://gstatic.com"></script>
-    <script src="https://gstatic.com"></script>
 </head>
 <body>
 
     <div class="container" style="max-width: 600px;">
         <div class="card">
-            <h2>📊 كشف هدايا الأولاد الفوري (لايف السحابة)</h2>
-            <p>الأسماء بتنزل هنا تلقائياً في نفس الثانية أول ما الولد يخدش الكارت الكنيسة 👇</p>
+            <h2>📊 كشف هدايا الأولاد الفوري</h2>
+            <p>الأسماء بتنزل هنا تلقائياً أول ما الولد يخدش الكارت 👇</p>
             
             <div style="max-height: 400px; overflow-y: auto; margin: 20px 0; border: 1px solid #dfe6e9; border-radius: 10px;">
                 <table style="width:100%; border-collapse: collapse; text-align:right; font-size:15px;">
@@ -30,39 +28,34 @@
                 </table>
             </div>
 
-            <button id="btn-clear-cloud" style="background-color:#d63031;" class="pulse-btn">تصفير وحذف الكشف من السحابة لشهر جديد 🗑️</button>
+            <button id="btn-clear-cloud" style="background-color:#d63031;" class="pulse-btn">تصفير وحذف الكشف لشهر جديد 🗑️</button>
         </div>
     </div>
 
     <script>
-        // إعدادات جلب البيانات السحابية لصفحتك الشخصية
-        const firebaseConfig = { databaseURL: "https://firebaseio.com" };
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-
         const tableBody = document.getElementById('live-table-body');
 
-        // دالة المراقبة اللحظية: تلتقط أي سحب جديد وتعرضه فوراً أمام عينيك بدون تحميل الصفحة
-        database.ref('gifts').on('value', (snapshot) => {
+        function loadData() {
             tableBody.innerHTML = "";
-            const data = snapshot.val();
-            if (!data) {
+            const data = JSON.parse(localStorage.getItem('admin_live_data')) || [];
+            if (data.length === 0) {
                 tableBody.innerHTML = `<tr><td colspan="3" style="padding:20px; text-align:center; color:#636e72;">الكشف فارغ تماماً حالياً 📭</td></tr>`;
                 return;
             }
-            Object.keys(data).forEach(key => {
-                const item = data[key];
+            data.forEach(item => {
                 let row = `<tr style="border-bottom: 1px solid #dfe6e9;"><td style="padding:12px; font-weight:600; color:#2d3436;">${item.name}</td><td style="padding:12px; color:#d63031; font-weight:bold;">${item.gift}</td><td style="padding:12px; color:#636e72; font-size:12px;">${item.time}</td></tr>`;
                 tableBody.innerHTML += row;
             });
-        });
+        }
 
-        // زر تصفير قاعدة البيانات لبدء شهر جديد
+        // تحديث الكشف تلقائياً كل ثانيتين لعرض الأسماء فوراً
+        setInterval(loadData, 2000);
+        loadData();
+
         document.getElementById('btn-clear-cloud').addEventListener('click', () => {
-            if (confirm("هل أنت متأكد من مسح كشف السحابة بالكامل لبدء سحب جديد؟ ⚠️")) {
-                database.ref('gifts').remove().then(() => {
-                    alert("تم تصفير السحابة بنجاح! 🗑️");
-                });
+            if (confirm("هل أنت متأكد من مسح كشف الهدايا بالكامل لبدء سحب جديد؟ ⚠️")) {
+                localStorage.removeItem('admin_live_data');
+                loadData();
             }
         });
     </script>

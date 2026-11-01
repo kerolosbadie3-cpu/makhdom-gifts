@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مفاجأة خدمة إعدادي 🎉</title>
-    <link rel="stylesheet" href="style.css?v=16">
+    <link rel="stylesheet" href="style.css?v=20">
 </head>
 <body>
 
@@ -20,27 +20,46 @@
             <p id="error-msg" class="error"></p>
         </div>
 
-        <!-- 2. صفحة الهدية المخفية -->
+        <!-- 2. صفحة الهدية المخفية للأولاد -->
         <div id="gift-page" class="card hidden">
             <h2 id="welcome-user">مبروووووك يا بطل 🎉🥳</h2>
             
-            <!-- الآية المفضلة لديك عن الفرح ببيت الرب -->
             <p class="bible-verse">«فَرِحْتُ بِالْقَائِلِينَ لِي: إِلَى بَيْتِ الرَّبِّ نَذْهَبُ» <br> <span>(مزمور 122: 1)</span></p>
             
             <p id="scratch-instruction">امسح واخدش المستطيل الرمادي اللي تحت عشان تكشف عن هديتك! 👇</p>
             
             <div class="scratch-container">
-                <!-- الهدية الحقيقية -->
                 <div id="gift-result" class="gift-text">🎯 ميدالية الخدمة</div>
-                <!-- الطبقة الرمادية المموّهة -->
                 <canvas id="scratch-canvas" width="300" height="100"></canvas>
             </div>
 
-            <!-- زر العودة لصفحة الدخول لتسجيل مخدوم آخر -->
             <button id="btn-logout" class="back-btn">دخول اسم آخر 🔄</button>
+        </div>
+
+        <!-- 3. صفحة لوحة التحكم السرية (تفتح لك أنت فقط عند كتابة اسمك الرباعي) -->
+        <div id="admin-page" class="card hidden">
+            <h2>📊 كشف هدايا الأولاد التلقائي</h2>
+            <p>دي قائمة لايف بالأسماء اللي سحبت كروت وجوائزها حالياً:</p>
+            
+            <div style="max-height: 250px; overflow-y: auto; margin: 15px 0; border: 1px solid #dfe6e9; border-radius: 10px;">
+                <table style="width:100%; border-collapse: collapse; text-align:right; font-size:14px;">
+                    <thead>
+                        <tr style="background-color:#f1f2f6; color:#2d3436;">
+                            <th style="padding:10px; border-bottom:2px solid #dfe6e9;">الاسم الرباعي</th>
+                            <th style="padding:10px; border-bottom:2px solid #dfe6e9;">الهدية</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-table-body">
+                        <!-- الأسماء بتنزل هنا تلقائياً -->
+                    </tbody>
+                </table>
+            </div>
+
+            <button id="btn-clear-all" style="background-color:#d63031; padding:10px; margin-bottom:10px;" class="pulse-btn">مسح وتصفير الكشف بالكامل 🗑️</button>
+            <button id="btn-close-admin" class="back-btn" style="margin-top:5px;">العودة لصفحة الحضور 🔙</button>
         </div>
     </div>
 
-    <script src="script.js?v=16" defer></script>
+    <script src="script.js?v=20" defer></script>
 </body>
 </html>
